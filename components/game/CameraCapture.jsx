@@ -29,14 +29,48 @@ export default function CameraCapture({
   const streamRef = useRef(null);
   const intervalRef = useRef(null);
   const stoppedRef = useRef(false);
+  const lastErrorRef = useRef("");
+
+  function postCameraDiagnostic(event, details = {}) {
+    fetch("/api/camera", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        sessionId,
+        taskKey,
+        chapter: chapterId,
+        level: levelId,
+        capturedAt: Date.now(),
+        extraData: {
+          event,
+          source: "CameraCapture",
+          ...details,
+        },
+      }),
+    }).catch(() => {});
+  }
+
+  function handleCameraError(error, event = "camera_error") {
+    const message = error?.message || String(error);
+    if (lastErrorRef.current !== message) {
+      lastErrorRef.current = message;
+      console.warn("[Horizons camera]", message);
+      postCameraDiagnostic(event, { message });
+    }
+    onError?.(error);
+  }
 
   useEffect(() => {
     if (!active || !sessionId || !taskKey) return undefined;
     if (!navigator?.mediaDevices?.getUserMedia) {
-      onError?.(new Error("Camera is not available in this browser"));
+      handleCameraError(
+        new Error("Camera is not available in this browser"),
+        "camera_unavailable",
+      );
       return undefined;
     }
     stoppedRef.current = false;
+    lastErrorRef.current = "";
 
     async function startCamera() {
       try {
@@ -54,6 +88,10 @@ export default function CameraCapture({
         streamRef.current = stream;
         videoRef.current.srcObject = stream;
         await videoRef.current.play();
+        postCameraDiagnostic("camera_stream_started", {
+          videoWidth: videoRef.current.videoWidth,
+          videoHeight: videoRef.current.videoHeight,
+        });
 
         intervalRef.current = window.setInterval(async () => {
           try {
@@ -79,11 +117,11 @@ export default function CameraCapture({
               body: JSON.stringify(payload),
             }).catch(() => {});
           } catch (error) {
-            onError?.(error);
+            handleCameraError(error, "camera_extractor_error");
           }
         }, captureEveryMs);
       } catch (error) {
-        onError?.(error);
+        handleCameraError(error, "camera_start_error");
       }
     }
 
