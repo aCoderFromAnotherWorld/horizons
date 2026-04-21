@@ -186,11 +186,11 @@ This plan implements the refined camera-based screening idea as an additive laye
   - [x] `bun test`.
   - [x] `bun run lint`.
   - [x] `bun run build`.
-- [ ] Manually test a full game session without camera.
-- [ ] Manually test a camera-enabled session with consent.
-- [ ] Manually test camera permission denial.
-- [ ] Manually test results generation with ML service offline.
-- [ ] Manually test results generation with ML service online.
+- [x] Manually test a full game session without camera.
+- [x] Manually test a camera-enabled session with consent.
+- [x] Manually test camera permission denial.
+- [x] Manually test results generation with ML service offline.
+- [x] Manually test results generation with ML service online.
 
 ## Phase 16: Optional MongoDB Migration
 
