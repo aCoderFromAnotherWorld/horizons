@@ -1,0 +1,220 @@
+# Asset Sources and Licenses
+
+Generated on 2026-04-15.
+
+## Sources
+
+- Kenney UI Pack from OpenGameArt: https://opengameart.org/content/ui-pack
+  - Author: Kenney
+  - License: CC0
+  - Used for UI source assets.
+- Kenney Interface Sounds from OpenGameArt: https://opengameart.org/content/interface-sounds
+  - Author: Kenney
+  - License: CC0
+  - Used for UI effect audio files.
+- OpenMoji color SVG set from GitHub: https://github.com/hfg-gmuend/openmoji
+  - License: CC BY-SA 4.0
+  - Used to compose most cartoon webp image assets.
+- Freesound CC0 audio discovered through Openverse: https://openverse.org/
+  - License: CC0 1.0
+  - Used for Phase 1-10 sensory and ambient replacement audio.
+
+## Notes
+
+The image assets are MVP-friendly composed illustrations based on OpenMoji SVGs.
+Phase 1-10 sensory and ambient audio files were replaced with CC0 source recordings on 2026-04-15, trimmed for gameplay length, and encoded as MP3 at 128 kbps.
+
+## Generated Files
+
+- backgrounds/main-menu.webp: composed from OpenMoji icons
+- backgrounds/chapter-1-room.webp: composed from OpenMoji icons
+- backgrounds/chapter-1-living-room.webp: composed from OpenMoji icons
+- backgrounds/emotion-island.webp: composed from OpenMoji icons
+- backgrounds/emotion-garden.webp: composed from OpenMoji icons
+- backgrounds/mirror-room.webp: composed from OpenMoji icons
+- backgrounds/story-room.webp: composed from OpenMoji icons
+- backgrounds/friends-house-exterior.webp: composed from OpenMoji icons
+- backgrounds/friends-house-interior.webp: composed from OpenMoji icons
+- backgrounds/playground.webp: composed from OpenMoji icons
+- backgrounds/village-morning.webp: composed from OpenMoji icons
+- backgrounds/bathroom.webp: composed from OpenMoji icons
+- backgrounds/unexpected-events.webp: composed from OpenMoji icons
+- backgrounds/theater-stage.webp: composed from OpenMoji icons
+- backgrounds/play-props-table.webp: composed from OpenMoji icons
+- backgrounds/sensory-garden.webp: composed from OpenMoji icons
+- backgrounds/forest-sounds.webp: composed from OpenMoji icons
+- backgrounds/house-rooms-grid.webp: composed from OpenMoji icons
+- backgrounds/texture-studio.webp: composed from OpenMoji icons
+- backgrounds/detective-office.webp: composed from OpenMoji icons
+- backgrounds/pattern-table.webp: composed from OpenMoji icons
+- backgrounds/toyroom-free-play.webp: composed from OpenMoji icons
+- backgrounds/library.webp: composed from OpenMoji icons
+- backgrounds/mirror-gym.webp: composed from OpenMoji icons
+- backgrounds/summary-stars.webp: composed from OpenMoji icons
+- backgrounds/results-celebration.webp: composed from OpenMoji icons
+- characters/guides/bunny.webp: OpenMoji 1F430
+- characters/guides/bunny-point.webp: OpenMoji 1F430
+- characters/guides/bunny-wave.webp: OpenMoji 1F430
+- characters/guides/bunny-happy.webp: OpenMoji 1F600
+- characters/guides/bunny-sad.webp: OpenMoji 1F622
+- characters/guides/owl.webp: OpenMoji 1F989
+- characters/guides/cat.webp: OpenMoji 1F431
+- characters/guides/dog.webp: OpenMoji 1F436
+- characters/guides/bear.webp: OpenMoji 1F43B
+- characters/avatar/body-base.webp: OpenMoji 1F9D2
+- characters/avatar/hair-1.webp: OpenMoji 1F9D1
+- characters/avatar/hair-2.webp: OpenMoji 1F9D1
+- characters/avatar/hair-3.webp: OpenMoji 1F469
+- characters/avatar/hair-4.webp: OpenMoji 1F468
+- characters/avatar/clothes-1.webp: OpenMoji 1F455
+- characters/avatar/clothes-2.webp: OpenMoji 1F457
+- characters/avatar/clothes-3.webp: OpenMoji 1F9E5
+- characters/avatar/clothes-4.webp: OpenMoji 1F45A
+- emotions/child-happy-1.webp: OpenMoji 1F600
+- emotions/child-happy-2.webp: OpenMoji 1F600
+- emotions/child-happy-3.webp: OpenMoji 1F600
+- emotions/child-sad-1.webp: OpenMoji 1F622
+- emotions/child-sad-2.webp: OpenMoji 1F622
+- emotions/child-sad-3.webp: OpenMoji 1F622
+- emotions/child-angry-1.webp: OpenMoji 1F620
+- emotions/child-angry-2.webp: OpenMoji 1F620
+- emotions/child-angry-3.webp: OpenMoji 1F620
+- emotions/child-scared-1.webp: OpenMoji 1F628
+- emotions/child-scared-2.webp: OpenMoji 1F628
+- emotions/child-scared-3.webp: OpenMoji 1F628
+- emotions/child-neutral.webp: OpenMoji 1F610
+- emotions/adult-happy-1.webp: OpenMoji 1F600
+- emotions/adult-happy-2.webp: OpenMoji 1F600
+- emotions/adult-happy-3.webp: OpenMoji 1F600
+- emotions/adult-sad-1.webp: OpenMoji 1F622
+- emotions/adult-sad-2.webp: OpenMoji 1F622
+- emotions/adult-sad-3.webp: OpenMoji 1F622
+- emotions/adult-angry-1.webp: OpenMoji 1F620
+- emotions/adult-angry-2.webp: OpenMoji 1F620
+- emotions/adult-angry-3.webp: OpenMoji 1F620
+- emotions/adult-scared-1.webp: OpenMoji 1F628
+- emotions/adult-scared-2.webp: OpenMoji 1F628
+- emotions/adult-scared-3.webp: OpenMoji 1F628
+- emotions/adult-neutral.webp: OpenMoji 1F610
+- emotions/animal-happy-1.webp: OpenMoji 1F600
+- emotions/animal-happy-2.webp: OpenMoji 1F600
+- emotions/animal-happy-3.webp: OpenMoji 1F600
+- emotions/animal-sad-1.webp: OpenMoji 1F622
+- emotions/animal-sad-2.webp: OpenMoji 1F622
+- emotions/animal-sad-3.webp: OpenMoji 1F622
+- emotions/animal-angry-1.webp: OpenMoji 1F620
+- emotions/animal-angry-2.webp: OpenMoji 1F620
+- emotions/animal-angry-3.webp: OpenMoji 1F620
+- emotions/animal-scared-1.webp: OpenMoji 1F628
+- emotions/animal-scared-2.webp: OpenMoji 1F628
+- emotions/animal-scared-3.webp: OpenMoji 1F628
+- emotions/animal-neutral.webp: OpenMoji 1F610
+- objects/lamp.webp: OpenMoji 1F4A1
+- objects/book.webp: OpenMoji 1F4D5
+- objects/cup.webp: OpenMoji 2615
+- objects/ball.webp: OpenMoji 26BD
+- objects/plant.webp: OpenMoji 1FAB4
+- objects/routines/wake-up.webp: OpenMoji 23F0
+- objects/routines/brush-teeth.webp: OpenMoji 1FAA5
+- objects/routines/get-dressed.webp: OpenMoji 1F455
+- objects/routines/eat-breakfast.webp: OpenMoji 1F963
+- objects/routines/pack-bag.webp: OpenMoji 1F392
+- objects/routines/put-shoes.webp: OpenMoji 1F45F
+- objects/playground/slide.webp: OpenMoji 1F6DD
+- objects/playground/swings.webp: OpenMoji 1FAA3
+- objects/playground/sandbox.webp: OpenMoji 1FAA3
+- objects/playground/climbing-frame.webp: OpenMoji 1F3D7
+- objects/playground/see-saw.webp: OpenMoji 1F6DD
+- objects/pretend/banana.webp: OpenMoji 1F34C
+- objects/pretend/pot.webp: OpenMoji 1F372
+- objects/pretend/teddy.webp: OpenMoji 1F9F8
+- objects/pretend/block.webp: OpenMoji 1F9F1
+- objects/pretend/empty-cup.webp: OpenMoji 2615
+- objects/pretend/stick.webp: OpenMoji 1FA84
+- objects/pretend/pillow.webp: OpenMoji 1F6CF
+- objects/pretend/box.webp: OpenMoji 1F4E6
+- objects/sounds-sources/birds.webp: OpenMoji 1F426
+- objects/sounds-sources/fountain.webp: OpenMoji 26F2
+- objects/sounds-sources/laughter.webp: OpenMoji 1F604
+- objects/sounds-sources/vacuum.webp: OpenMoji 1F9F9
+- objects/sounds-sources/dog.webp: OpenMoji 1F436
+- objects/sounds-sources/thunder.webp: OpenMoji 26C8
+- objects/sounds-sources/baby.webp: OpenMoji 1F476
+- objects/sounds-sources/traffic.webp: OpenMoji 1F697
+- objects/rooms/calm-painting.webp: OpenMoji 1F5BC
+- objects/rooms/rainbow.webp: OpenMoji 1F308
+- objects/rooms/flickering.webp: OpenMoji 1F4A1
+- objects/rooms/spinning-pinwheel.webp: OpenMoji 1F300
+- objects/rooms/crowded.webp: OpenMoji 1F465
+- objects/rooms/stripes.webp: OpenMoji 1F4CA
+- objects/textures/cotton.webp: OpenMoji 1F9F6
+- objects/textures/glass.webp: OpenMoji 1FA9E
+- objects/textures/rock.webp: OpenMoji 1FAA8
+- objects/textures/clay.webp: OpenMoji 1F9F1
+- objects/textures/honey.webp: OpenMoji 1F36F
+- objects/textures/sandpaper.webp: OpenMoji 1FAA8
+- objects/textures/ribbon.webp: OpenMoji 1F380
+- objects/textures/jello.webp: OpenMoji 1F36E
+- objects/topics/trains.webp: OpenMoji 1F686
+- objects/topics/space.webp: OpenMoji 1F680
+- objects/topics/animals.webp: OpenMoji 1F981
+- objects/topics/numbers.webp: OpenMoji 1F522
+- objects/topics/colors.webp: OpenMoji 1F3A8
+- objects/topics/dinosaurs.webp: OpenMoji 1F996
+- objects/topics/cars.webp: OpenMoji 1F697
+- objects/topics/music.webp: OpenMoji 1F3B5
+- objects/actions/wave.webp: OpenMoji 1F44B
+- objects/actions/clap.webp: OpenMoji 1F44F
+- objects/actions/thumbs-up.webp: OpenMoji 1F44D
+- objects/actions/smile.webp: OpenMoji 1F603
+- objects/actions/frown.webp: OpenMoji 2639
+- objects/actions/wink.webp: OpenMoji 1F609
+- objects/actions/surprised.webp: OpenMoji 1F632
+- objects/actions/arms-up.webp: OpenMoji 1F64C
+- objects/actions/jump.webp: OpenMoji 1F998
+- objects/actions/sit.webp: OpenMoji 1F9D8
+- objects/actions/pour-water.webp: OpenMoji 1F6B0
+- objects/actions/stack-blocks.webp: OpenMoji 1F9F1
+- ui/flower-happy.webp: OpenMoji 1F33C
+- ui/flower-sad.webp: OpenMoji 1F490
+- ui/flower-angry.webp: OpenMoji 1F339
+- ui/flower-scared.webp: OpenMoji 1F940
+- ui/progress-rocket.webp: OpenMoji 1F680
+- ui/planet-1.webp: OpenMoji 1FA90
+- ui/planet-2.webp: OpenMoji 1F6F8
+- objects/patterns/circle-red.svg: generated SVG shape
+- objects/patterns/circle-blue.svg: generated SVG shape
+- objects/patterns/circle-yellow.svg: generated SVG shape
+- objects/patterns/square-red.svg: generated SVG shape
+- objects/patterns/square-blue.svg: generated SVG shape
+- objects/patterns/square-green.svg: generated SVG shape
+- objects/patterns/triangle-red.svg: generated SVG shape
+- objects/patterns/triangle-blue.svg: generated SVG shape
+- objects/patterns/star-yellow.svg: generated SVG shape
+- ui/star-gold.svg: Kenney UI Pack (star.png)
+- ui/star-empty.svg: Kenney UI Pack (star_outline.png)
+- ui/checkmark.svg: Kenney UI Pack (icon_checkmark.png)
+- ui/x-mark.svg: Kenney UI Pack (icon_cross.png)
+- ui/arrow-right.svg: Kenney UI Pack (arrow_basic_e.png)
+- sounds/effects/click.mp3: Kenney Interface Sounds (click_001.ogg)
+- sounds/effects/correct.mp3: Kenney Interface Sounds (confirmation_001.ogg)
+- sounds/effects/wrong.mp3: Kenney Interface Sounds (error_001.ogg)
+- sounds/effects/drag-start.mp3: Kenney Interface Sounds (switch_001.ogg)
+- sounds/effects/drop.mp3: Kenney Interface Sounds (drop_001.ogg)
+- sounds/effects/page-turn.mp3: Kenney Interface Sounds (scroll_001.ogg)
+- sounds/effects/star.mp3: Kenney Interface Sounds (glass_001.ogg)
+- sounds/effects/cheer.mp3: Kenney Interface Sounds (confirmation_003.ogg)
+- sounds/effects/timer-tick.mp3: Kenney Interface Sounds (tick_001.ogg)
+- sounds/ambient/main-menu.mp3: "Upbeat loop" by mistermender, Freesound CC0 1.0, https://freesound.org/people/mistermender/sounds/512340
+- sounds/ambient/nature.mp3: "outdoor ambience" by seth-m, Freesound CC0 1.0, https://freesound.org/people/seth-m/sounds/269782
+- sounds/ambient/playground.mp3: "playground 02.wav" by klankbeeld, Freesound CC0 1.0, https://freesound.org/people/klankbeeld/sounds/175904
+- sounds/ambient/library.mp3: "Quiet library ambience" by xkeril, Freesound CC0 1.0, https://freesound.org/people/xkeril/sounds/620683
+- sounds/ambient/celebration.mp3: "happy loop.mp3" by wi-photos, Freesound CC0 1.0, https://freesound.org/people/wi-photos/sounds/506791
+- sounds/sensory/birds.mp3: "Birds Chirping 01 - Down small park lane" by swiftoid, Freesound CC0 1.0, https://freesound.org/people/swiftoid/sounds/182503
+- sounds/sensory/fountain.mp3: "Water Fountain no motor spill.wav" by jedg, Freesound CC0 1.0, https://freesound.org/people/jedg/sounds/505970
+- sounds/sensory/laughter.mp3: "children playing" by goldkelchen, Freesound CC0 1.0, https://freesound.org/people/goldkelchen/sounds/371377
+- sounds/sensory/vacuum.mp3: "Vacuum Cleaner" by AO-SoundPawz, Freesound CC0 1.0, https://freesound.org/people/AO-SoundPawz/sounds/542149
+- sounds/sensory/dog-bark.mp3: "A dog barking (close recording)" by felix.blume, Freesound CC0 1.0, https://freesound.org/people/felix.blume/sounds/199261
+- sounds/sensory/thunder.mp3: "Thunder Clap" by DaniloSFX, Freesound CC0 1.0, https://freesound.org/people/DaniloSFX/sounds/672776
+- sounds/sensory/baby-cry.mp3: "01 baby crying hard.wav" by PickleJones, Freesound CC0 1.0, https://freesound.org/people/PickleJones/sounds/151085
+- sounds/sensory/traffic.mp3: "Traffic noise in the street of Tuzla, Bosnia" by Davor, Freesound CC0 1.0, https://freesound.org/people/Davor/sounds/382267
