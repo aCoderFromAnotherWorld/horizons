@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
+import CameraCapture from "@/components/game/CameraCapture";
 import EmotionFace from "@/components/game/EmotionFace";
 import FeedbackOverlay from "@/components/game/FeedbackOverlay";
 import BigButton from "@/components/shared/BigButton";
@@ -34,8 +35,15 @@ function parseOption(path) {
 
 export default function Chapter2Level2Page() {
   const router = useRouter();
-  const { sessionId, playerAge, playerName, setSession, addScore, goToChapter } =
-    useGameStore();
+  const {
+    sessionId,
+    playerAge,
+    playerName,
+    cameraEnabled,
+    setSession,
+    addScore,
+    goToChapter,
+  } = useGameStore();
   const [trialIndex, setTrialIndex] = useState(0);
   const [totalPoints, setTotalPoints] = useState(0);
   const [feedback, setFeedback] = useState(null);
@@ -126,6 +134,13 @@ export default function Chapter2Level2Page() {
 
   return (
     <section className="mx-auto flex w-full max-w-5xl flex-col items-center gap-8 px-6 py-10 text-center">
+      <CameraCapture
+        sessionId={sessionId}
+        taskKey={trial.id}
+        chapterId={2}
+        levelId={2}
+        active={cameraEnabled && !feedback}
+      />
       <div className="rounded-2xl bg-white/90 px-8 py-6 shadow-xl">
         <p className="text-sm font-black uppercase text-indigo-700">
           Trial {trialIndex + 1} of {expressionTrials.length}

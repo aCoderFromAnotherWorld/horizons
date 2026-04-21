@@ -5,6 +5,7 @@ import SafeImage from "@/components/shared/SafeImage";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 
+import CameraCapture from "@/components/game/CameraCapture";
 import FeedbackOverlay from "@/components/game/FeedbackOverlay";
 import { simpleActions } from "@/lib/gameData/chapter8";
 import {
@@ -21,6 +22,7 @@ export default function Chapter8Level1Page() {
     sessionId,
     playerAge,
     playerName,
+    cameraEnabled,
     setSession,
     addScore,
     addRedFlag,
@@ -170,6 +172,13 @@ export default function Chapter8Level1Page() {
 
   return (
     <section className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-10 lg:grid-cols-[1fr_380px]">
+      <CameraCapture
+        sessionId={sessionId}
+        taskKey={`ch8_simple_${action.id}`}
+        chapterId={8}
+        levelId={1}
+        active={cameraEnabled && !locked}
+      />
       <FeedbackOverlay
         show={Boolean(feedback)}
         correct={feedback?.correct}

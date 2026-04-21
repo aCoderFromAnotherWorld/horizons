@@ -8,6 +8,9 @@ export const useGameStore = create(
       sessionId: null,
       playerAge: null,
       playerName: null,
+      cameraEnabled: false,
+      cameraConsentAt: null,
+      cameraConsentVersion: null,
 
       // Navigation
       currentChapter: 1,
@@ -21,6 +24,17 @@ export const useGameStore = create(
       // Helpers
       setSession: (id, age, name) =>
         set({ sessionId: id, playerAge: age, playerName: name }),
+
+      setCameraConsent: ({
+        enabled,
+        consentAt = null,
+        consentVersion = null,
+      }) =>
+        set({
+          cameraEnabled: Boolean(enabled),
+          cameraConsentAt: consentAt,
+          cameraConsentVersion: consentVersion,
+        }),
 
       goToChapter: (chapter, level = 1) =>
         set({ currentChapter: chapter, currentLevel: level }),
@@ -37,6 +51,9 @@ export const useGameStore = create(
           sessionId: null,
           playerAge: null,
           playerName: null,
+          cameraEnabled: false,
+          cameraConsentAt: null,
+          cameraConsentVersion: null,
           currentChapter: 1,
           currentLevel: 1,
           scores: {},

@@ -25,6 +25,11 @@ import {
   getMovementsBySession,
 } from "@/lib/db/queries/mouseMovements.js";
 import {
+  getCameraFramesBySession,
+  getCameraFramesByTask,
+  saveCameraFrame,
+} from "@/lib/db/queries/cameraFrames.js";
+import {
   addRedFlag,
   getRedFlagsBySession,
 } from "@/lib/db/queries/redFlags.js";
@@ -32,6 +37,10 @@ import {
   getDomainScoresBySession,
   upsertDomainScore,
 } from "@/lib/db/queries/domainScores.js";
+import {
+  getMlPredictionBySession,
+  upsertMlPrediction,
+} from "@/lib/db/queries/mlPredictions.js";
 
 let db;
 
@@ -71,6 +80,9 @@ describe("session queries", () => {
       currentLevel: 1,
       status: "active",
       avatarData: { hair: 2, clothes: 1 },
+      cameraEnabled: false,
+      cameraConsentAt: null,
+      cameraConsentVersion: null,
     });
   });
 
@@ -89,16 +101,22 @@ describe("session queries", () => {
     const updated = updateSession("session-1", {
       completedAt: 2000,
       currentChapter: 3,
-      currentLevel: 2,
-      status: "completed",
-      avatarData: { hairColor: 4 },
-    });
+        currentLevel: 2,
+        status: "completed",
+        avatarData: { hairColor: 4 },
+        cameraEnabled: true,
+        cameraConsentAt: 3000,
+        cameraConsentVersion: "camera-consent-v1",
+      });
 
     expect(updated.completedAt).toBe(2000);
     expect(updated.currentChapter).toBe(3);
     expect(updated.currentLevel).toBe(2);
     expect(updated.status).toBe("completed");
     expect(updated.avatarData).toEqual({ hairColor: 4 });
+    expect(updated.cameraEnabled).toBe(true);
+    expect(updated.cameraConsentAt).toBe(3000);
+    expect(updated.cameraConsentVersion).toBe("camera-consent-v1");
   });
 
   test("updateSession with no fields returns the existing session", () => {
@@ -315,6 +333,90 @@ describe("mouse movement queries", () => {
   });
 });
 
+describe("camera frame queries", () => {
+  test("saveCameraFrame stores derived facial expression data", () => {
+    seedSession();
+    const frame = saveCameraFrame({
+      sessionId: "session-1",
+      taskKey: "ch2_expression_1",
+      chapter: 2,
+      level: 2,
+      capturedAt: 1234,
+      faceLandmarks: [{ x: 0.1, y: 0.2, z: 0.3 }],
+      expressionScores: { happy: 0.85, neutral: 0.1 },
+      gazeDirection: { x: 0.2, y: -0.1 },
+      blinkRate: 0.25,
+      headPose: { pitch: 1, yaw: 2, roll: 3 },
+      extraData: { model: "test-expression-model" },
+    });
+
+    expect(frame).toMatchObject({
+      sessionId: "session-1",
+      taskKey: "ch2_expression_1",
+      chapter: 2,
+      level: 2,
+      capturedAt: 1234,
+      expressionScores: { happy: 0.85, neutral: 0.1 },
+      gazeDirection: { x: 0.2, y: -0.1 },
+      blinkRate: 0.25,
+      headPose: { pitch: 1, yaw: 2, roll: 3 },
+      extraData: { model: "test-expression-model" },
+    });
+    expect(frame.faceLandmarks).toEqual([{ x: 0.1, y: 0.2, z: 0.3 }]);
+  });
+
+  test("getCameraFramesBySession returns frames in insert order", () => {
+    seedSession();
+    saveCameraFrame({
+      sessionId: "session-1",
+      taskKey: "first",
+      capturedAt: 100,
+    });
+    saveCameraFrame({
+      sessionId: "session-1",
+      taskKey: "second",
+      capturedAt: 200,
+    });
+
+    expect(getCameraFramesBySession("session-1").map((frame) => frame.taskKey)).toEqual([
+      "first",
+      "second",
+    ]);
+  });
+
+  test("getCameraFramesByTask filters by session and task key", () => {
+    seedSession();
+    saveCameraFrame({ sessionId: "session-1", taskKey: "same", capturedAt: 100 });
+    saveCameraFrame({ sessionId: "session-1", taskKey: "same", capturedAt: 200 });
+    saveCameraFrame({ sessionId: "session-1", taskKey: "other", capturedAt: 300 });
+
+    expect(getCameraFramesByTask("session-1", "same")).toHaveLength(2);
+  });
+
+  test("camera_frames enforces session foreign key", () => {
+    expect(() =>
+      saveCameraFrame({
+        sessionId: "missing",
+        taskKey: "bad",
+        capturedAt: 100,
+      }),
+    ).toThrow();
+  });
+
+  test("deleting a session cascades to camera frames", () => {
+    seedSession();
+    saveCameraFrame({
+      sessionId: "session-1",
+      taskKey: "cascade",
+      capturedAt: 100,
+    });
+
+    deleteSession("session-1");
+
+    expect(getCameraFramesBySession("session-1")).toEqual([]);
+  });
+});
+
 describe("red flag queries", () => {
   test("addRedFlag inserts a flag with default severity", () => {
     seedSession();
@@ -403,5 +505,95 @@ describe("domain score queries", () => {
     expect(() =>
       upsertDomainScore({ sessionId: "missing", domain: "pretend_play" }),
     ).toThrow();
+  });
+});
+
+describe("ML prediction queries", () => {
+  test("upsertMlPrediction stores model output and feature metadata", () => {
+    seedSession();
+    const prediction = upsertMlPrediction({
+      sessionId: "session-1",
+      modelVersion: "rf_v1.0",
+      modelType: "random_forest",
+      asdProbability: 0.72,
+      confidence: 0.81,
+      consensusRisk: "high",
+      featureVector: [1, 2, 3],
+      featureNames: ["a", "b", "c"],
+      shapValues: { a: 0.2 },
+      predictedAt: 9000,
+      inferenceMs: 42,
+      serviceAvailable: true,
+    });
+
+    expect(prediction).toMatchObject({
+      sessionId: "session-1",
+      modelVersion: "rf_v1.0",
+      modelType: "random_forest",
+      asdProbability: 0.72,
+      confidence: 0.81,
+      consensusRisk: "high",
+      featureVector: [1, 2, 3],
+      featureNames: ["a", "b", "c"],
+      shapValues: { a: 0.2 },
+      predictedAt: 9000,
+      inferenceMs: 42,
+      serviceAvailable: true,
+    });
+  });
+
+  test("upsertMlPrediction updates an existing session prediction", () => {
+    seedSession();
+    upsertMlPrediction({
+      sessionId: "session-1",
+      modelVersion: "rf_v1.0",
+      modelType: "random_forest",
+      asdProbability: 0.2,
+      confidence: 0.6,
+      consensusRisk: "low",
+    });
+    const updated = upsertMlPrediction({
+      sessionId: "session-1",
+      modelVersion: "rf_v1.1",
+      modelType: "random_forest",
+      asdProbability: 0.8,
+      confidence: 0.9,
+      consensusRisk: "high",
+      serviceAvailable: false,
+    });
+
+    expect(updated.modelVersion).toBe("rf_v1.1");
+    expect(updated.asdProbability).toBe(0.8);
+    expect(updated.serviceAvailable).toBe(false);
+    expect(getMlPredictionBySession("session-1").consensusRisk).toBe("high");
+  });
+
+  test("ml_predictions enforces session foreign key", () => {
+    expect(() =>
+      upsertMlPrediction({
+        sessionId: "missing",
+        modelVersion: "rf_v1.0",
+        modelType: "random_forest",
+        asdProbability: 0.5,
+        confidence: 0.5,
+        consensusRisk: "medium",
+      }),
+    ).toThrow();
+  });
+
+  test("deleting a session cascades to ML predictions", () => {
+    seedSession();
+    upsertMlPrediction({
+      sessionId: "session-1",
+      modelVersion: "rf_v1.0",
+      modelType: "random_forest",
+      asdProbability: 0.5,
+      confidence: 0.5,
+      consensusRisk: "medium",
+    });
+
+    deleteSession("session-1");
+
+    expect(getMlPredictionBySession("session-1")).toBeNull();
   });
 });

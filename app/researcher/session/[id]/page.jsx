@@ -18,6 +18,7 @@ import {
 import { getMovementsBySession } from "@/lib/db/queries/mouseMovements.js";
 import { getResponsesBySession } from "@/lib/db/queries/responses.js";
 import { getSession } from "@/lib/db/queries/sessions.js";
+import { riskFromProbability } from "@/lib/ml/mlClient.js";
 import {
   formatDate,
   formatDuration,
@@ -29,6 +30,22 @@ import { cn } from "@/lib/utils";
 
 function gaugeRotation(score) {
   return Math.min(180, Math.max(0, (score / 100) * 180));
+}
+
+function getMlFeatureValue(prediction, featureName) {
+  const index = prediction?.featureNames?.indexOf(featureName);
+  if (index === undefined || index < 0) return 0;
+  return prediction.featureVector?.[index] || 0;
+}
+
+function getShapEntries(shapValues) {
+  if (!shapValues) return [];
+  if (Array.isArray(shapValues)) {
+    return shapValues
+      .map((value, index) => [`feature_${index + 1}`, value])
+      .filter(([, value]) => Number.isFinite(value));
+  }
+  return Object.entries(shapValues).filter(([, value]) => Number.isFinite(value));
 }
 
 export default async function ResearcherSessionPage({ params }) {
@@ -140,6 +157,128 @@ export default async function ResearcherSessionPage({ params }) {
           </CardContent>
         </Card>
       </div>
+
+      <Card className="mt-6">
+        <CardHeader>
+          <CardTitle>ML Screening Support</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {results.mlPrediction ? (
+            <div className="grid gap-4 md:grid-cols-4">
+              <div>
+                <p className="text-sm font-bold text-muted-foreground">Status</p>
+                <p className="mt-1 text-xl font-black">
+                  {results.mlPrediction.serviceAvailable ? "Available" : "Unavailable"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-muted-foreground">
+                  Rule Risk
+                </p>
+                <Badge
+                  className={cn(
+                    "mt-1 text-base",
+                    RISK_BADGE_CLASSES[results.riskLevel] ||
+                      RISK_BADGE_CLASSES.unknown,
+                  )}
+                >
+                  {results.riskLevel}
+                </Badge>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-muted-foreground">
+                  ASD Probability
+                </p>
+                <p className="mt-1 text-xl font-black">
+                  {Math.round(results.mlPrediction.asdProbability * 100)}%
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-muted-foreground">
+                  Confidence
+                </p>
+                <p className="mt-1 text-xl font-black">
+                  {Math.round(results.mlPrediction.confidence * 100)}%
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-muted-foreground">
+                  ML Risk
+                </p>
+                <Badge
+                  className={cn(
+                    "mt-1 text-base",
+                    RISK_BADGE_CLASSES[
+                      riskFromProbability(results.mlPrediction.asdProbability)
+                    ] || RISK_BADGE_CLASSES.unknown,
+                  )}
+                >
+                  {riskFromProbability(results.mlPrediction.asdProbability)}
+                </Badge>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-muted-foreground">
+                  Consensus Risk
+                </p>
+                <Badge
+                  className={cn(
+                    "mt-1 text-base",
+                    RISK_BADGE_CLASSES[results.mlPrediction.consensusRisk] ||
+                      RISK_BADGE_CLASSES.unknown,
+                  )}
+                >
+                  {results.mlPrediction.consensusRisk}
+                </Badge>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-muted-foreground">
+                  Camera Frames
+                </p>
+                <p className="mt-1 text-xl font-black">
+                  {getMlFeatureValue(results.mlPrediction, "camera_frame_count")}
+                </p>
+              </div>
+              <div className="md:col-span-4">
+                <p className="text-sm font-bold text-muted-foreground">
+                  Model
+                </p>
+                <p className="mt-1 font-bold text-foreground">
+                  {results.mlPrediction.modelType} /{" "}
+                  {results.mlPrediction.modelVersion}
+                </p>
+                <p className="mt-2 text-sm font-semibold text-muted-foreground">
+                  ML output is screening support only and does not diagnose ASD.
+                </p>
+              </div>
+              {getShapEntries(results.mlPrediction.shapValues).length ? (
+                <div className="md:col-span-4">
+                  <p className="text-sm font-bold text-muted-foreground">
+                    Feature Importance
+                  </p>
+                  <div className="mt-3 grid gap-2">
+                    {getShapEntries(results.mlPrediction.shapValues)
+                      .sort(([, a], [, b]) => Math.abs(b) - Math.abs(a))
+                      .slice(0, 5)
+                      .map(([feature, value]) => (
+                        <div
+                          key={feature}
+                          className="flex items-center justify-between rounded-lg bg-secondary px-3 py-2 text-sm font-bold"
+                        >
+                          <span>{feature}</span>
+                          <span>{Number(value).toFixed(3)}</span>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              ) : null}
+            </div>
+          ) : (
+            <p className="font-bold text-muted-foreground">
+              No ML prediction has been generated for this session yet.
+            </p>
+          )}
+        </CardContent>
+      </Card>
 
       <Card className="mt-6">
         <CardHeader>

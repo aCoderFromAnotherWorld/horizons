@@ -6,6 +6,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 
 import AnimalGuide from "@/components/game/AnimalGuide";
 import AvatarDisplay from "@/components/game/AvatarDisplay";
+import CameraCapture from "@/components/game/CameraCapture";
 import BigButton from "@/components/shared/BigButton";
 import { Button } from "@/components/ui/button";
 import { useTaskTimer } from "@/hooks/useTaskTimer";
@@ -28,8 +29,15 @@ export default function Chapter1Level1Page() {
   const callStartedAtRef = useRef(null);
   const completingRef = useRef(false);
   const totalScoreRef = useRef(0);
-  const { sessionId, playerAge, playerName, setSession, goToChapter, addScore } =
-    useGameStore();
+  const {
+    sessionId,
+    playerAge,
+    playerName,
+    cameraEnabled,
+    setSession,
+    goToChapter,
+    addScore,
+  } = useGameStore();
   const avatar = useAvatarStore();
   const [phase, setPhase] = useState("avatar");
   const [currentTrial, setCurrentTrial] = useState(0);
@@ -176,6 +184,13 @@ export default function Chapter1Level1Page() {
 
     return (
       <section className="flex w-full max-w-5xl flex-col items-center gap-8 px-6 py-10 text-center">
+        <CameraCapture
+          sessionId={sessionId}
+          taskKey={nameCallConfig.taskKeys[currentTrial]}
+          chapterId={1}
+          levelId={1}
+          active={cameraEnabled}
+        />
         <div className="rounded-2xl bg-white/90 px-8 py-5 shadow-xl">
           <p className="text-lg font-black uppercase text-indigo-700">
             Name Response

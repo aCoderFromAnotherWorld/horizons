@@ -20,12 +20,21 @@ import { toast } from "@/components/ui/use-toast";
 import { AGE_OPTIONS, startOnboardingSession } from "@/lib/onboarding";
 import { useGameStore } from "@/store/gameStore";
 
+const CAMERA_CONSENT_VERSION = "camera-consent-v1";
+
 export default function Home() {
   const router = useRouter();
-  const { sessionId, currentChapter, currentLevel, setSession } = useGameStore();
+  const {
+    sessionId,
+    currentChapter,
+    currentLevel,
+    setSession,
+    setCameraConsent,
+  } = useGameStore();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [playerName, setPlayerName] = useState("");
   const [playerAge, setPlayerAge] = useState(null);
+  const [cameraChoice, setCameraChoice] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
@@ -37,12 +46,25 @@ export default function Home() {
   }, [sessionId, currentChapter, currentLevel]);
 
   async function startSession() {
-    if (!playerAge || isSubmitting) return;
+    if (!playerAge || !cameraChoice || isSubmitting) return;
 
     setIsSubmitting(true);
     try {
-      const data = await startOnboardingSession({ playerAge, playerName });
+      const cameraEnabled = cameraChoice === "allow";
+      const cameraConsentAt = cameraEnabled ? Date.now() : null;
+      const data = await startOnboardingSession({
+        playerAge,
+        playerName,
+        cameraEnabled,
+        cameraConsentAt,
+        cameraConsentVersion: cameraEnabled ? CAMERA_CONSENT_VERSION : null,
+      });
       setSession(data.sessionId, data.session.playerAge, data.session.playerName);
+      setCameraConsent({
+        enabled: data.session.cameraEnabled,
+        consentAt: data.session.cameraConsentAt,
+        consentVersion: data.session.cameraConsentVersion,
+      });
       router.push(data.route);
     } catch (error) {
       toast({
@@ -175,9 +197,38 @@ export default function Home() {
                 </div>
               </div>
 
+              <div className="rounded-lg border border-border bg-background/70 p-4 text-left">
+                <p className="text-sm font-bold text-foreground">
+                  Optional camera observation
+                </p>
+                <p className="mt-1 text-sm font-semibold text-muted-foreground">
+                  With caregiver permission, later tasks can use the camera to
+                  estimate facial expression signals. No photos or video are
+                  saved.
+                </p>
+                <div className="mt-4 grid gap-3 sm:grid-cols-2">
+                  <Button
+                    type="button"
+                    variant={cameraChoice === "allow" ? "default" : "outline"}
+                    className="rounded-lg"
+                    onClick={() => setCameraChoice("allow")}
+                  >
+                    Allow Camera
+                  </Button>
+                  <Button
+                    type="button"
+                    variant={cameraChoice === "skip" ? "default" : "outline"}
+                    className="rounded-lg"
+                    onClick={() => setCameraChoice("skip")}
+                  >
+                    Skip Camera
+                  </Button>
+                </div>
+              </div>
+
               <BigButton
                 className="w-full bg-primary text-2xl text-primary-foreground disabled:opacity-50"
-                disabled={!playerAge || isSubmitting}
+                disabled={!playerAge || !cameraChoice || isSubmitting}
                 onClick={startSession}
               >
                 {isSubmitting ? "Starting..." : "Let's Play!"}
