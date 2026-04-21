@@ -36,11 +36,55 @@ describe("onboarding flow helper", () => {
 
     expect(calls[0]).toEqual({
       url: "/api/session",
-      body: { playerAge: 6, playerName: "Ari" },
+      body: {
+        playerAge: 6,
+        playerName: "Ari",
+        cameraEnabled: false,
+        cameraConsentAt: null,
+        cameraConsentVersion: null,
+      },
     });
     expect(result).toMatchObject({
       sessionId: "onboarding-session",
       route: "/chapter-1",
+    });
+  });
+
+  test("passes camera consent fields when enabled", async () => {
+    const calls = [];
+    const fetchImpl = async (url, init) => {
+      calls.push({ url, body: JSON.parse(init.body) });
+      return Response.json(
+        {
+          sessionId: "camera-session",
+          session: {
+            id: "camera-session",
+            playerAge: 7,
+            playerName: null,
+            cameraEnabled: true,
+            cameraConsentAt: 5000,
+            cameraConsentVersion: "camera-consent-v1",
+          },
+        },
+        { status: 201 },
+      );
+    };
+
+    await startOnboardingSession({
+      playerAge: 7,
+      playerName: "",
+      cameraEnabled: true,
+      cameraConsentAt: 5000,
+      cameraConsentVersion: "camera-consent-v1",
+      fetchImpl,
+    });
+
+    expect(calls[0].body).toEqual({
+      playerAge: 7,
+      playerName: null,
+      cameraEnabled: true,
+      cameraConsentAt: 5000,
+      cameraConsentVersion: "camera-consent-v1",
     });
   });
 });

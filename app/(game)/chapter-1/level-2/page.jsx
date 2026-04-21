@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import FeedbackOverlay from "@/components/game/FeedbackOverlay";
+import CameraCapture from "@/components/game/CameraCapture";
 import SafeImage from "@/components/shared/SafeImage";
 import BigButton from "@/components/shared/BigButton";
 import { Button } from "@/components/ui/button";
@@ -47,8 +48,15 @@ function getObjectPosition(index, total) {
 export default function Chapter1Level2Page() {
   const router = useRouter();
   const { start, stop, reset } = useTaskTimer();
-  const { sessionId, playerAge, playerName, setSession, goToChapter, addScore } =
-    useGameStore();
+  const {
+    sessionId,
+    playerAge,
+    playerName,
+    cameraEnabled,
+    setSession,
+    goToChapter,
+    addScore,
+  } = useGameStore();
   const trialOrder = useMemo(
     () => shuffle(guideTargetObjects.map((_, index) => index)),
     [],
@@ -275,6 +283,13 @@ export default function Chapter1Level2Page() {
 
   return (
     <section className="scene-viewport relative flex h-full min-h-0 w-full flex-col overflow-hidden">
+      <CameraCapture
+        sessionId={sessionId}
+        taskKey={`ch1_guide_${currentTrial + 1}`}
+        chapterId={1}
+        levelId={2}
+        active={cameraEnabled && trialState !== "feedback"}
+      />
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{

@@ -5,6 +5,7 @@ import SafeImage from "@/components/shared/SafeImage";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import CameraCapture from "@/components/game/CameraCapture";
 import BigButton from "@/components/shared/BigButton";
 import { pretendPlayAnimations } from "@/lib/gameData/chapter5";
 import {
@@ -19,6 +20,7 @@ export default function Chapter5Level1Page() {
     sessionId,
     playerAge,
     playerName,
+    cameraEnabled,
     setSession,
     addScore,
     addRedFlag,
@@ -149,6 +151,13 @@ export default function Chapter5Level1Page() {
 
   return (
     <section className="mx-auto grid w-full max-w-6xl gap-8 px-6 py-10 lg:grid-cols-[1fr_420px]">
+      <CameraCapture
+        sessionId={sessionId}
+        taskKey={`ch5_pretend_recognition_${trial.id}`}
+        chapterId={5}
+        levelId={1}
+        active={cameraEnabled && !locked}
+      />
       <motion.div
         key={trial.id}
         className="rounded-2xl bg-white/90 p-8 shadow-xl"

@@ -1,6 +1,7 @@
 import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { Database } from "bun:sqlite";
 
+import * as cameraRoute from "@/app/api/camera/route.js";
 import * as flagRoute from "@/app/api/flag/route.js";
 import * as mouseRoute from "@/app/api/mouse/route.js";
 import * as responseRoute from "@/app/api/response/route.js";
@@ -10,6 +11,8 @@ import * as sessionRoute from "@/app/api/session/route.js";
 import * as sessionIdRoute from "@/app/api/session/[id]/route.js";
 import { resetDbForTests, setDbForTests } from "@/lib/db/index.js";
 import { SCHEMA } from "@/lib/db/schema.js";
+import { getCameraFramesBySession } from "@/lib/db/queries/cameraFrames.js";
+import { getMlPredictionBySession } from "@/lib/db/queries/mlPredictions.js";
 import { getResponsesBySession } from "@/lib/db/queries/responses.js";
 
 let db;
@@ -57,6 +60,9 @@ function routeRequest(request) {
   }
   if (pathname === "/api/mouse" && method === "POST") {
     return mouseRoute.POST(request);
+  }
+  if (pathname === "/api/camera" && method === "POST") {
+    return cameraRoute.POST(request);
   }
   if (pathname === "/api/flag" && method === "POST") {
     return flagRoute.POST(request);
@@ -195,12 +201,18 @@ describe("session API routes", () => {
         currentLevel: 2,
         status: "active",
         avatarData: { hair: 1 },
+        cameraEnabled: true,
+        cameraConsentAt: 4000,
+        cameraConsentVersion: "camera-consent-v1",
       },
     });
 
     expect(response.status).toBe(200);
     expect(response.body.session.currentChapter).toBe(4);
     expect(response.body.session.avatarData).toEqual({ hair: 1 });
+    expect(response.body.session.cameraEnabled).toBe(true);
+    expect(response.body.session.cameraConsentAt).toBe(4000);
+    expect(response.body.session.cameraConsentVersion).toBe("camera-consent-v1");
   });
 
   test("DELETE /api/session/[id] deletes a session", async () => {
@@ -351,6 +363,48 @@ describe("data collection API routes", () => {
     expect(response.body.inserted).toBe(2);
   });
 
+  test("POST /api/camera logs derived camera metadata", async () => {
+    await createApiSession();
+
+    const response = await fetchRoute(cameraRoute.POST, {
+      method: "POST",
+      path: "/api/camera",
+      body: {
+        sessionId: "api-session",
+        taskKey: "ch2_expression_1",
+        chapter: 2,
+        level: 2,
+        capturedAt: 3000,
+        faceLandmarks: [{ x: 0.1, y: 0.2, z: 0.3 }],
+        expressionScores: { happy: 0.8, neutral: 0.2 },
+      },
+    });
+
+    expect(response.status).toBe(201);
+    expect(response.body.saved).toBe(true);
+    expect(response.body.frame.expressionScores).toEqual({
+      happy: 0.8,
+      neutral: 0.2,
+    });
+  });
+
+  test("POST /api/camera fails non-fatally for an invalid session", async () => {
+    const response = await fetchRoute(cameraRoute.POST, {
+      method: "POST",
+      path: "/api/camera",
+      body: {
+        sessionId: "missing",
+        taskKey: "ch2_expression_1",
+        capturedAt: 3000,
+        expressionScores: { happy: 0.8 },
+      },
+    });
+
+    expect(response.status).toBe(200);
+    expect(response.body.saved).toBe(false);
+    expect(response.body.error).toBe("Session not found");
+  });
+
   test("POST /api/flag logs a red flag", async () => {
     await createApiSession();
 
@@ -458,6 +512,32 @@ describe("results API route", () => {
     );
   });
 
+  test("GET /api/results/[sessionId] returns unavailable ML fallback when service is not configured", async () => {
+    const previousUrl = process.env.ML_SERVICE_URL;
+    delete process.env.ML_SERVICE_URL;
+    await seedResultsData();
+
+    let response;
+    try {
+      response = await fetchRoute(resultsRoute.GET, {
+        path: "/api/results/api-session",
+        params: { sessionId: "api-session" },
+      });
+    } finally {
+      if (previousUrl === undefined) {
+        delete process.env.ML_SERVICE_URL;
+      } else {
+        process.env.ML_SERVICE_URL = previousUrl;
+      }
+    }
+
+    expect(response.status).toBe(200);
+    expect(response.body.ml.serviceAvailable).toBe(false);
+    expect(response.body.ml.consensusRisk).toBe(response.body.riskLevel);
+    expect(response.body.ml.featureVector).toHaveLength(44);
+    expect(getMlPredictionBySession("api-session").serviceAvailable).toBe(false);
+  });
+
   test("GET /api/results/[sessionId] returns 404 for a missing session", async () => {
     const response = await fetchRoute(resultsRoute.GET, {
       path: "/api/results/missing",
@@ -471,6 +551,15 @@ describe("results API route", () => {
   test("full session lifecycle deletes cascaded responses", async () => {
     await createApiSession();
     await addApiResponse({ taskKey: "ch2_before_delete" });
+    await fetchRoute(cameraRoute.POST, {
+      method: "POST",
+      path: "/api/camera",
+      body: {
+        sessionId: "api-session",
+        taskKey: "camera_before_delete",
+        capturedAt: 1000,
+      },
+    });
 
     await fetchRoute(sessionIdRoute.DELETE, {
       method: "DELETE",
@@ -479,5 +568,6 @@ describe("results API route", () => {
     });
 
     expect(getResponsesBySession("api-session")).toEqual([]);
+    expect(getCameraFramesBySession("api-session")).toEqual([]);
   });
 });

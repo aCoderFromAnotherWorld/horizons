@@ -5,6 +5,7 @@ import SafeImage from "@/components/shared/SafeImage";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
+import CameraCapture from "@/components/game/CameraCapture";
 import BigButton from "@/components/shared/BigButton";
 import { greetingSteps } from "@/lib/gameData/chapter3";
 import { scoreGreetingStep } from "@/lib/scoring/chapter3";
@@ -12,8 +13,15 @@ import { useGameStore } from "@/store/gameStore";
 
 export default function Chapter3Level1Page() {
   const router = useRouter();
-  const { sessionId, playerAge, playerName, setSession, addScore, goToChapter } =
-    useGameStore();
+  const {
+    sessionId,
+    playerAge,
+    playerName,
+    cameraEnabled,
+    setSession,
+    addScore,
+    goToChapter,
+  } = useGameStore();
   const [stepIndex, setStepIndex] = useState(0);
   const [totalPoints, setTotalPoints] = useState(0);
   const [locked, setLocked] = useState(false);
@@ -98,6 +106,13 @@ export default function Chapter3Level1Page() {
 
   return (
     <section className="scene-viewport relative w-full overflow-hidden">
+      <CameraCapture
+        sessionId={sessionId}
+        taskKey={`ch3_greeting_${step.id}`}
+        chapterId={3}
+        levelId={1}
+        active={cameraEnabled && !locked}
+      />
       <div
         className="absolute inset-0 bg-cover bg-center"
         style={{

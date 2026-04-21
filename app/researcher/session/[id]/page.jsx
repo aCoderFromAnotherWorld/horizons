@@ -143,6 +143,70 @@ export default async function ResearcherSessionPage({ params }) {
 
       <Card className="mt-6">
         <CardHeader>
+          <CardTitle>ML Screening Support</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {results.mlPrediction ? (
+            <div className="grid gap-4 md:grid-cols-4">
+              <div>
+                <p className="text-sm font-bold text-muted-foreground">Status</p>
+                <p className="mt-1 text-xl font-black">
+                  {results.mlPrediction.serviceAvailable ? "Available" : "Unavailable"}
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-muted-foreground">
+                  ASD Probability
+                </p>
+                <p className="mt-1 text-xl font-black">
+                  {Math.round(results.mlPrediction.asdProbability * 100)}%
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-muted-foreground">
+                  Confidence
+                </p>
+                <p className="mt-1 text-xl font-black">
+                  {Math.round(results.mlPrediction.confidence * 100)}%
+                </p>
+              </div>
+              <div>
+                <p className="text-sm font-bold text-muted-foreground">
+                  Consensus Risk
+                </p>
+                <Badge
+                  className={cn(
+                    "mt-1 text-base",
+                    RISK_BADGE_CLASSES[results.mlPrediction.consensusRisk] ||
+                      RISK_BADGE_CLASSES.unknown,
+                  )}
+                >
+                  {results.mlPrediction.consensusRisk}
+                </Badge>
+              </div>
+              <div className="md:col-span-4">
+                <p className="text-sm font-bold text-muted-foreground">
+                  Model
+                </p>
+                <p className="mt-1 font-bold text-foreground">
+                  {results.mlPrediction.modelType} /{" "}
+                  {results.mlPrediction.modelVersion}
+                </p>
+                <p className="mt-2 text-sm font-semibold text-muted-foreground">
+                  ML output is screening support only and does not diagnose ASD.
+                </p>
+              </div>
+            </div>
+          ) : (
+            <p className="font-bold text-muted-foreground">
+              No ML prediction has been generated for this session yet.
+            </p>
+          )}
+        </CardContent>
+      </Card>
+
+      <Card className="mt-6">
+        <CardHeader>
           <CardTitle>Red Flags</CardTitle>
         </CardHeader>
         <CardContent className="grid gap-3">

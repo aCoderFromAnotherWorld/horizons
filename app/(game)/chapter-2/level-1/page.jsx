@@ -6,6 +6,7 @@ import SafeImage from "@/components/shared/SafeImage";
 import { useRouter } from "next/navigation";
 import { useMemo, useRef, useState } from "react";
 
+import CameraCapture from "@/components/game/CameraCapture";
 import DragDropSortable from "@/components/game/DragDropSortable";
 import EmotionFace from "@/components/game/EmotionFace";
 import {
@@ -34,8 +35,15 @@ function getCardEmotion(card) {
 
 export default function Chapter2Level1Page() {
   const router = useRouter();
-  const { sessionId, playerAge, playerName, setSession, addScore, goToChapter } =
-    useGameStore();
+  const {
+    sessionId,
+    playerAge,
+    playerName,
+    cameraEnabled,
+    setSession,
+    addScore,
+    goToChapter,
+  } = useGameStore();
   const [phase, setPhase] = useState("faces");
   const [remainingIds, setRemainingIds] = useState(faceCards.map((card) => card.id));
   const [stats, setStats] = useState({
@@ -174,6 +182,13 @@ export default function Chapter2Level1Page() {
 
   return (
     <section className="grid w-full max-w-7xl gap-6 px-6 py-8 lg:grid-cols-[1fr_360px]">
+      <CameraCapture
+        sessionId={sessionId}
+        taskKey={`ch2_emotion_matching_${phase}`}
+        chapterId={2}
+        levelId={1}
+        active={cameraEnabled}
+      />
       <div className="rounded-2xl bg-white/90 p-6 shadow-xl">
         <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
           <div>
