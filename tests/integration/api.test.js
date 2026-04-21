@@ -538,6 +538,47 @@ describe("results API route", () => {
     expect(getMlPredictionBySession("api-session").serviceAvailable).toBe(false);
   });
 
+  test("GET /api/results/[sessionId] stores available ML service prediction", async () => {
+    const previousUrl = process.env.ML_SERVICE_URL;
+    const originalFetch = globalThis.fetch;
+    process.env.ML_SERVICE_URL = "http://ml.test";
+    globalThis.fetch = async (url, init) => {
+      expect(url).toBe("http://ml.test/predict");
+      expect(JSON.parse(init.body).features).toHaveLength(44);
+      return Response.json({
+        asd_probability: 0.72,
+        confidence: 0.88,
+        model_version: "rf_test",
+        model_type: "random_forest",
+        shap_values: { expression_mirror_accuracy: 0.2 },
+        inference_ms: 12,
+      });
+    };
+
+    await seedResultsData();
+
+    let response;
+    try {
+      response = await fetchRoute(resultsRoute.GET, {
+        path: "/api/results/api-session",
+        params: { sessionId: "api-session" },
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+      if (previousUrl === undefined) {
+        delete process.env.ML_SERVICE_URL;
+      } else {
+        process.env.ML_SERVICE_URL = previousUrl;
+      }
+    }
+
+    expect(response.status).toBe(200);
+    expect(response.body.ml.serviceAvailable).toBe(true);
+    expect(response.body.ml.asdProbability).toBe(0.72);
+    expect(response.body.ml.modelVersion).toBe("rf_test");
+    expect(getMlPredictionBySession("api-session").serviceAvailable).toBe(true);
+  });
+
   test("GET /api/results/[sessionId] returns 404 for a missing session", async () => {
     const response = await fetchRoute(resultsRoute.GET, {
       path: "/api/results/missing",

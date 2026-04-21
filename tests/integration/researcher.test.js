@@ -4,6 +4,7 @@ import { Database } from "bun:sqlite";
 import * as authRoute from "@/app/api/researcher/auth/route.js";
 import * as exportRoute from "@/app/researcher/export/route.js";
 import { resetDbForTests, setDbForTests } from "@/lib/db/index.js";
+import { saveCameraFrame } from "@/lib/db/queries/cameraFrames.js";
 import { createResponse } from "@/lib/db/queries/responses.js";
 import { addChapterScore } from "@/lib/db/queries/scores.js";
 import { createSession } from "@/lib/db/queries/sessions.js";
@@ -32,6 +33,7 @@ function seedResearcherSession() {
     startedAt: 1000,
     completedAt: 61000,
     status: "completed",
+    cameraEnabled: true,
   });
   addChapterScore({
     sessionId: "research-session",
@@ -49,6 +51,12 @@ function seedResearcherSession() {
     isCorrect: true,
     scorePoints: 0,
     extraData: { emotion: "happy" },
+  });
+  saveCameraFrame({
+    sessionId: "research-session",
+    taskKey: "ch2_emotion_test",
+    capturedAt: 3000,
+    expressionScores: { happy: 0.8, neutral: 0.2 },
   });
 }
 
@@ -146,5 +154,37 @@ describe("researcher export route", () => {
 
     expect(response.status).toBe(400);
     expect(body.error).toBe("Unsupported format");
+  });
+
+  test("exports labeled training CSV", async () => {
+    seedResearcherSession();
+
+    const labels = encodeURIComponent(JSON.stringify({ "research-session": 1 }));
+    const response = await exportRoute.GET(
+      makeGetRequest(`/researcher/export?format=training-csv&labels=${labels}`),
+    );
+    const text = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toContain("text/csv");
+    expect(text).toContain("session_id");
+    expect(text).toContain("camera_frame_count");
+    expect(text).toContain("label");
+    expect(text).toContain("research-session");
+  });
+
+  test("exports labeled training data quality", async () => {
+    seedResearcherSession();
+
+    const labels = encodeURIComponent(JSON.stringify({ "research-session": 1 }));
+    const response = await exportRoute.GET(
+      makeGetRequest(`/researcher/export?format=training-quality&labels=${labels}`),
+    );
+    const body = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(body.totalSessions).toBe(1);
+    expect(body.classBalance["1"]).toBe(1);
+    expect(body.missingCameraDataRate).toBe(0);
   });
 });

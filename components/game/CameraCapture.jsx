@@ -6,10 +6,12 @@ import {
   buildCameraFramePayload,
   hasCameraDerivedData,
 } from "@/lib/camera/framePayload";
+import { getMediaPipeExpressionExtractor } from "@/lib/camera/mediapipeExpressionExtractor";
 
 async function defaultExtractor(video, context) {
-  const extractor = globalThis.window?.horizonsCameraExtractor;
-  if (!extractor?.extract) return null;
+  const customExtractor = globalThis.window?.horizonsCameraExtractor;
+  if (customExtractor?.extract) return customExtractor.extract(video, context);
+  const extractor = await getMediaPipeExpressionExtractor();
   return extractor.extract(video, context);
 }
 
@@ -34,14 +36,6 @@ export default function CameraCapture({
       onError?.(new Error("Camera is not available in this browser"));
       return undefined;
     }
-    if (
-      extractor === defaultExtractor &&
-      !globalThis.window?.horizonsCameraExtractor?.extract
-    ) {
-      onError?.(new Error("Camera extractor is not available"));
-      return undefined;
-    }
-
     stoppedRef.current = false;
 
     async function startCamera() {

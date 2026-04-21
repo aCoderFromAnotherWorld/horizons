@@ -4,6 +4,8 @@ Camera capture is optional and caregiver-consent gated.
 
 The application must not store raw camera images, video frames, screenshots, or pixel buffers. Camera capture should run in the browser and send only derived metadata to `/api/camera`.
 
+The browser extractor uses MediaPipe FaceLandmarker through `components/game/CameraCapture.jsx` and `lib/camera/mediapipeExpressionExtractor.js`. It derives facial landmarks, iris landmarks, approximate gaze direction, blink signal, head-pose signal, and heuristic expression scores from FaceLandmarker blendshapes.
+
 ## Stored Fields
 
 The `camera_frames` table stores:
@@ -37,4 +39,3 @@ Camera is disabled by default. If camera permission is denied, unavailable, or t
 ## ML Use
 
 Camera-derived features currently include expression flatness, expression mirror accuracy, gaze-to-face ratio, eye-contact duration estimate, blink rate, and head-pose variability. These are screening-support signals only and are not diagnostic.
-

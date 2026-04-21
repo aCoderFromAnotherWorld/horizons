@@ -50,10 +50,10 @@ This plan implements the refined camera-based screening idea as an additive laye
   - [x] Run only when `active={true}`.
   - [x] Stop camera tracks on unmount.
   - [x] Hide the video element from the child UI.
-- [ ] Integrate MediaPipe or a local face-expression library.
-  - [ ] Extract facial landmarks.
-  - [ ] Extract expression probabilities.
-  - [ ] Optionally extract blink rate, gaze direction, and head pose.
+- [x] Integrate MediaPipe or a local face-expression library.
+  - [x] Extract facial landmarks.
+  - [x] Extract expression probabilities.
+  - [x] Optionally extract blink rate, gaze direction, and head pose.
 - [x] Batch or throttle uploads to `/api/camera`.
 - [x] Add graceful fallback for unavailable camera, permission denial, or model load failure.
 
@@ -88,7 +88,7 @@ This plan implements the refined camera-based screening idea as an additive laye
   - [x] Return a stable ordered feature vector.
   - [x] Export feature names with the vector.
 - [x] Add tests to lock feature order and feature count.
-- [ ] Add a development export route or script for training CSV generation.
+- [x] Add a development export route or script for training CSV generation.
 
 ## Phase 8: ML Prediction Storage
 
@@ -126,14 +126,14 @@ This plan implements the refined camera-based screening idea as an additive laye
   - [x] `0`: non-ASD / typical development.
   - [x] `1`: ASD confirmed by clinician or validated clinical assessment.
 - [x] Do not use the rule-based score as the ML label.
-- [ ] Add CSV export for labeled sessions.
-- [ ] Add data quality checks.
-  - [ ] Missing camera data rate.
-  - [ ] Session completion rate.
-  - [ ] Age distribution.
-  - [ ] Class balance.
-- [ ] Split data into train, validation, and holdout test sets.
-- [ ] Report ROC-AUC, sensitivity, specificity, precision, recall, calibration, and confusion matrix.
+- [x] Add CSV export for labeled sessions.
+- [x] Add data quality checks.
+  - [x] Missing camera data rate.
+  - [x] Session completion rate.
+  - [x] Age distribution.
+  - [x] Class balance.
+- [x] Split data into train, validation, and holdout test sets.
+- [x] Report ROC-AUC, sensitivity, specificity, precision, recall, calibration, and confusion matrix.
 
 ## Phase 11: Next.js ML Client
 
@@ -155,7 +155,7 @@ This plan implements the refined camera-based screening idea as an additive laye
   - [x] Store ML prediction.
   - [x] Return additive `ml` field without removing existing response fields.
 - [ ] Add integration tests for:
-  - [ ] ML service available.
+  - [x] ML service available.
   - [x] ML service unavailable.
   - [x] No camera consent.
   - [x] Missing camera data.
@@ -166,11 +166,11 @@ This plan implements the refined camera-based screening idea as an additive laye
   - [x] ASD probability.
   - [x] Model confidence.
   - [x] Model version.
-  - [ ] Rule-based risk vs ML risk vs consensus risk.
-  - [ ] Camera data availability.
-- [ ] Add SHAP or feature-importance chart when returned by the ML service.
-- [ ] Add clear non-diagnostic language.
-- [ ] Keep current domain score and red-flag displays visible.
+  - [x] Rule-based risk vs ML risk vs consensus risk.
+  - [x] Camera data availability.
+- [x] Add SHAP or feature-importance chart when returned by the ML service.
+- [x] Add clear non-diagnostic language.
+- [x] Keep current domain score and red-flag displays visible.
 
 ## Phase 14: Privacy And Clinical Safeguards
 
