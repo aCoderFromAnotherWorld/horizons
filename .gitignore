@@ -14,10 +14,10 @@
 /coverage
 
 # local sqlite runtime data
-horizons.db
-horizons.db-*
-*.db
-*.db-*
+# horizons.db
+# horizons.db-*
+# *.db
+# *.db-*
 
 # next.js
 /.next/
