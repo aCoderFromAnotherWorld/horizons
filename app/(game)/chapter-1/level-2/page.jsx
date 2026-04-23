@@ -17,6 +17,7 @@ import { useGameStore } from "@/store/gameStore";
 const guide = guideAnimals[0];
 const ANSWER_LIMIT_SECONDS = 10;
 const OBJECT_RING_RADIUS_PERCENT = 36;
+const HINT_SECONDS = 5;
 
 function randomInt(min, max) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -33,6 +34,12 @@ function shuffle(items) {
 
 function getObjectAngle(index, total) {
   return (360 / total) * index;
+}
+
+function getObjectIndexFromAngle(angle, total) {
+  const stepAngle = 360 / total;
+  const normalizedAngle = ((angle % 360) + 360) % 360;
+  return Math.round(normalizedAngle / stepAngle) % total;
 }
 
 function getObjectPosition(index, total) {
@@ -65,6 +72,7 @@ export default function Chapter1Level2Page() {
   const countdownIntervalRef = useRef(null);
   const pointerStopRef = useRef(null);
   const nextTrialRef = useRef(null);
+  const highlightIntervalRef = useRef(null);
   const currentAngleRef = useRef(0);
   const answerStartedAtRef = useRef(null);
   const totalScoreRef = useRef(0);
@@ -80,9 +88,12 @@ export default function Chapter1Level2Page() {
   const [trialState, setTrialState] = useState("spinning");
   const [feedback, setFeedback] = useState(null);
   const [selectedObjectId, setSelectedObjectId] = useState(null);
+  const [highlightedObjectIndex, setHighlightedObjectIndex] = useState(null);
+  const [hintLabel, setHintLabel] = useState(null);
 
   const objectCount = guideTargetObjects.length;
   const target = guideTargetObjects[trialOrder[currentTrial]];
+  const targetIndex = trialOrder[currentTrial];
   const objectPositions = useMemo(
     () => guideTargetObjects.map((_, index) => getObjectPosition(index, objectCount)),
     [objectCount],
@@ -92,6 +103,7 @@ export default function Chapter1Level2Page() {
     clearTimeout(answerTimeoutRef.current);
     clearTimeout(pointerStopRef.current);
     clearTimeout(nextTrialRef.current);
+    clearInterval(highlightIntervalRef.current);
     clearInterval(countdownIntervalRef.current);
   }, []);
 
@@ -233,6 +245,8 @@ export default function Chapter1Level2Page() {
     setPromptUsed(false);
     setFeedback(null);
     setSelectedObjectId(null);
+    setHighlightedObjectIndex(null);
+    setHintLabel(null);
     setTrialState("spinning");
     setCountdown(ANSWER_LIMIT_SECONDS);
     setMessage("Watch Bunny's paw spin to a surprise object.");
@@ -243,14 +257,36 @@ export default function Chapter1Level2Page() {
     const targetAngle = getObjectAngle(trialOrder[currentTrial], objectCount);
     const clockwiseDelta = (targetAngle - currentAngle + 360) % 360;
     const nextAngle = currentAngleRef.current + extraTurns + clockwiseDelta;
+    const stepAngle = 360 / objectCount;
+    const totalHighlightSteps = Math.max(
+      1,
+      Math.round((extraTurns + clockwiseDelta) / stepAngle),
+    );
+    const highlightStepMs = spinMs / totalHighlightSteps;
+    const initialHighlightIndex = getObjectIndexFromAngle(currentAngle, objectCount);
 
     currentAngleRef.current = nextAngle;
     setSpinDuration(spinMs / 1000);
     setPointerAngle(nextAngle);
+    setHighlightedObjectIndex(initialHighlightIndex);
+
+    let highlightIndex = initialHighlightIndex;
+    let completedHighlightSteps = 0;
+    highlightIntervalRef.current = setInterval(() => {
+      completedHighlightSteps += 1;
+      highlightIndex = (highlightIndex + 1) % objectCount;
+      setHighlightedObjectIndex(highlightIndex);
+
+      if (completedHighlightSteps >= totalHighlightSteps) {
+        clearInterval(highlightIntervalRef.current);
+      }
+    }, highlightStepMs);
 
     pointerStopRef.current = setTimeout(() => {
+      clearInterval(highlightIntervalRef.current);
+      setHighlightedObjectIndex(trialOrder[currentTrial]);
       beginAnswerPhase();
-    }, spinMs);
+    }, spinMs + 20);
   }, [
     beginAnswerPhase,
     clearTrialTimers,
@@ -272,8 +308,24 @@ export default function Chapter1Level2Page() {
 
   function showHint() {
     if (trialState !== "answering" || !target) return;
+    clearTimeout(answerTimeoutRef.current);
+    clearInterval(countdownIntervalRef.current);
     setPromptUsed(true);
-    setMessage(`Bunny is pointing to the ${target.label}. Pick its name below.`);
+    setTrialState("hint");
+    setCountdown(HINT_SECONDS);
+    setHighlightedObjectIndex(targetIndex);
+    setHintLabel(target.label);
+    setMessage(`Hint: Bunny is pointing to the ${target.label}. Watch it glow.`);
+
+    countdownIntervalRef.current = setInterval(() => {
+      setCountdown((seconds) => (seconds > 0 ? seconds - 1 : 0));
+    }, 1000);
+
+    nextTrialRef.current = setTimeout(() => {
+      clearInterval(countdownIntervalRef.current);
+      startTrial();
+      setPromptUsed(true);
+    }, HINT_SECONDS * 1000);
   }
 
   function selectAnswer(objectId) {
@@ -320,14 +372,24 @@ export default function Chapter1Level2Page() {
               </p>
               <p className="text-2xl font-black text-amber-900">{countdown}s</p>
             </div>
-            <Button
-              className="rounded-full px-5"
-              variant="secondary"
-              onClick={showHint}
-              disabled={trialState !== "answering"}
-            >
-              Hear a hint
-            </Button>
+            <div className="flex min-w-32 flex-col items-center gap-1">
+              <Button
+                className="rounded-full px-5"
+                variant="secondary"
+                onClick={showHint}
+                disabled={trialState !== "answering"}
+              >
+                {trialState === "hint" ? "Showing hint" : "Hear a hint"}
+              </Button>
+              {hintLabel ? (
+                <p
+                  className="text-sm font-black text-amber-800"
+                  aria-live="polite"
+                >
+                  {hintLabel}
+                </p>
+              ) : null}
+            </div>
           </div>
         </div>
 
@@ -350,7 +412,44 @@ export default function Chapter1Level2Page() {
                   className="absolute z-20 -translate-x-1/2 -translate-y-1/2"
                   style={objectPositions[index]}
                 >
-                  <div className="rounded-[28px] bg-white/90 p-3 shadow-xl ring-4 ring-white/55 sm:p-4">
+                  <motion.div
+                    className={`relative rounded-[28px] bg-white/90 p-3 shadow-xl ring-4 sm:p-4 ${
+                      highlightedObjectIndex === index
+                        ? "ring-amber-300"
+                        : "ring-white/55"
+                    }`}
+                    animate={
+                      highlightedObjectIndex === index
+                        ? {
+                            boxShadow: [
+                              "0 0 0 6px rgb(251 191 36 / 0.45), 0 0 24px rgb(251 191 36 / 0.6)",
+                              "0 0 0 10px rgb(250 204 21 / 0.65), 0 0 42px rgb(245 158 11 / 0.85)",
+                              "0 0 0 6px rgb(251 191 36 / 0.45), 0 0 24px rgb(251 191 36 / 0.6)",
+                            ],
+                            scale: [1, 1.08, 1],
+                          }
+                        : {
+                            boxShadow: "0 12px 28px rgb(15 23 42 / 0.18)",
+                            scale: 1,
+                          }
+                    }
+                    transition={
+                      highlightedObjectIndex === index
+                        ? { duration: 0.8, repeat: Infinity, ease: "easeInOut" }
+                        : { duration: 0.2 }
+                    }
+                  >
+                    {highlightedObjectIndex === index ? (
+                      <motion.div
+                        className="pointer-events-none absolute -inset-3 rounded-[34px] border-[6px] border-amber-300/85"
+                        animate={{ opacity: [0.7, 1, 0.7] }}
+                        transition={{
+                          duration: 0.8,
+                          repeat: Infinity,
+                          ease: "easeInOut",
+                        }}
+                      />
+                    ) : null}
                     <SafeImage
                       src={object.image}
                       alt={object.label}
@@ -358,7 +457,7 @@ export default function Chapter1Level2Page() {
                       height={128}
                       className="h-18 w-18 object-contain sm:h-24 sm:w-24"
                     />
-                  </div>
+                  </motion.div>
                 </div>
               ))}
 
