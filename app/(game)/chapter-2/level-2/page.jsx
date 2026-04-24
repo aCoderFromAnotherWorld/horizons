@@ -7,10 +7,14 @@ import CameraCapture from "@/components/game/CameraCapture";
 import EmotionFace from "@/components/game/EmotionFace";
 import FeedbackOverlay from "@/components/game/FeedbackOverlay";
 import BigButton from "@/components/shared/BigButton";
+import SafeImage from "@/components/shared/SafeImage";
 import { useAudio } from "@/hooks/useAudio";
+import { guideAnimals } from "@/lib/gameData/chapter1";
 import { expressionTrials } from "@/lib/gameData/chapter2";
 import { scoreExpressionSelection } from "@/lib/scoring/chapter2";
 import { useGameStore } from "@/store/gameStore";
+
+const guide = guideAnimals[0];
 
 function shuffleArray(items) {
   const copy = [...items];
@@ -21,15 +25,15 @@ function shuffleArray(items) {
   return copy;
 }
 
-function parseOption(path) {
-  const file = path.split("/").pop().replace(".webp", "");
-  const parts = file.split("-");
-  if (parts.includes("neutral")) {
-    return { emotion: "neutral", intensity: 2 };
-  }
+function parseOption(path, fallbackIntensity = 2) {
+  const file = path.split("/").pop().replace(/\.(png|webp)$/i, "");
+  const parts = file.includes("_") ? file.split("_") : file.split("-");
+  const emotion = parts[1] || "neutral";
+  const parsedIntensity = Number(parts[2]);
+
   return {
-    emotion: parts[1],
-    intensity: Number(parts[2] || 2),
+    emotion,
+    intensity: Number.isFinite(parsedIntensity) ? parsedIntensity : fallbackIntensity,
   };
 }
 
@@ -74,7 +78,7 @@ export default function Chapter2Level2Page() {
 
   async function chooseOption(optionPath, optionIndex) {
     if (feedback) return;
-    const selected = parseOption(optionPath);
+    const selected = parseOption(optionPath, trial.intensity);
     const result = scoreExpressionSelection({
       targetEmotion: trial.emotion,
       targetIntensity: trial.intensity,
@@ -153,20 +157,31 @@ export default function Chapter2Level2Page() {
         </p>
       </div>
 
+      <div className="relative flex aspect-square h-44 w-44 items-center justify-center overflow-hidden rounded-full bg-white/92 shadow-2xl ring-8 ring-indigo-100/80 sm:h-52 sm:w-52">
+        <div className="absolute inset-0 rounded-full bg-[radial-gradient(circle_at_top,_rgb(129_140_248/_0.24),_transparent_58%)]" />
+        <SafeImage
+          src={guide.pointImage || guide.image}
+          alt={guide.name}
+          width={240}
+          height={280}
+          className="relative z-10 h-36 w-28 object-contain sm:h-44 sm:w-32"
+        />
+      </div>
+
       <div className="grid w-full gap-4 sm:grid-cols-2 lg:grid-cols-5">
         {shuffledOptions.map((option, index) => {
-          const parsed = parseOption(option);
+          const parsed = parseOption(option, trial.intensity);
           return (
             <BigButton
               key={`${option}-${index}`}
-              className="min-h-44 bg-white text-zinc-900 hover:bg-yellow-100"
+              className="min-h-52 overflow-hidden p-3 items-center justify-center bg-white text-zinc-900 hover:bg-yellow-100 sm:min-h-56"
               onClick={() => void chooseOption(option, index)}
             >
               <EmotionFace
                 emotion={parsed.emotion}
                 intensity={parsed.intensity}
                 imagePath={option}
-                className="h-32 w-32"
+                className="h-36 w-36 sm:h-40 sm:w-40"
               />
             </BigButton>
           );
