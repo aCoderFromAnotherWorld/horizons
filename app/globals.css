@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme {
+  /* Chapter color palettes */
+  --color-ch1-primary: #6366f1;
+  --color-ch1-secondary: #a78bfa;
+  --color-ch1-accent: #fbbf24;
+
+  --color-ch2-primary: #f59e0b;
+  --color-ch2-secondary: #fcd34d;
+  --color-ch2-accent: #ef4444;
+
+  --color-ch3-primary: #3b82f6;
+  --color-ch3-secondary: #67e8f9;
+  --color-ch3-accent: #f9a8d4;
+
+  --color-ch4-primary: #10b981;
+  --color-ch4-secondary: #86efac;
+  --color-ch4-accent: #fde68a;
+
+  --color-ch5-primary: #8b5cf6;
+  --color-ch5-secondary: #f472b6;
+  --color-ch5-accent: #c084fc;
+
+  --color-ch6-primary: #eab308;
+  --color-ch6-secondary: #fde68a;
+  --color-ch6-accent: #f97316;
+
+  --color-dash-primary: #0f172a;
+  --color-dash-secondary: #1e293b;
+  --color-dash-accent: #6366f1;
+
+  --color-mkt-primary: #f8fafc;
+  --color-mkt-secondary: #e2e8f0;
+  --color-mkt-accent: #6366f1;
+
+  /* ShadCN base tokens */
+  --color-background: #ffffff;
+  --color-foreground: #171717;
+  --color-border: #e2e8f0;
+  --color-input: #e2e8f0;
+  --color-ring: #6366f1;
+  --color-primary: #6366f1;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #f1f5f9;
+  --color-secondary-foreground: #0f172a;
+  --color-muted: #f1f5f9;
+  --color-muted-foreground: #64748b;
+  --color-accent: #f1f5f9;
+  --color-accent-foreground: #0f172a;
+  --color-destructive: #ef4444;
+  --color-destructive-foreground: #ffffff;
+  --color-card: #ffffff;
+  --color-card-foreground: #171717;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #171717;
+
+  --radius: 1rem;
+  --font-game: "Nunito", sans-serif;
+  --font-sans: var(--font-nunito), "Nunito", sans-serif;
+}
+
+body {
+  font-family: var(--font-sans);
+}
