@@ -14,10 +14,10 @@
 /coverage
 
 # local sqlite runtime data
-horizons.db
-horizons.db-*
-*.db
-*.db-*
+# horizons.db
+# horizons.db-*
+# *.db
+# *.db-*
 
 # next.js
 /.next/
@@ -47,3 +47,12 @@ yarn-error.log*
 next-env.d.ts
 
 **/.DS_Store
+.claude*/
+prds/
+.mcp.json
+CLAUDE.md
+TRACKER.md
+Plan.md
+docs/
+issues/
+docs/
