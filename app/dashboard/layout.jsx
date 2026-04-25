@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import Link from 'next/link';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -106,7 +106,6 @@ function SidebarContent({ user, pathname, onNav, onSignOut }) {
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
-  const router   = useRouter();
   const [user, setUser]         = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
   const [ready, setReady]       = useState(false);
@@ -115,20 +114,34 @@ export default function DashboardLayout({ children }) {
     fetch('/api/auth/get-session', { credentials: 'include' })
       .then(r => r.json())
       .then(data => {
-        if (!data?.user) {
-          router.replace('/dashboard/login');
+        if (!data?.user || data.user.is_active === false) {
+          window.location.href = '/dashboard/login';
         } else {
           setUser(data.user);
           setReady(true);
         }
       })
-      .catch(() => router.replace('/dashboard/login'));
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+      .catch(() => { window.location.href = '/dashboard/login'; });
+  // Re-validate on route change to catch mid-session deactivation
+   
+  }, [pathname]);
 
   async function handleSignOut() {
-    await fetch('/api/auth/sign-out', { method: 'POST', credentials: 'include' }).catch(() => {});
-    router.replace('/dashboard/login');
+    if (!window.confirm('Sign out of Horizons Dashboard?')) return;
+    try {
+      const res = await fetch('/api/auth/sign-out', { method: 'POST', credentials: 'include' });
+      if (!res.ok) throw new Error('sign-out failed');
+    } catch {
+      // Retry once
+      try {
+        await fetch('/api/auth/sign-out', { method: 'POST', credentials: 'include' });
+      } catch {
+         
+        console.warn('Sign-out may have failed — close the browser to be safe.');
+      }
+    }
+    // Full reload to flush all React state
+    window.location.href = '/dashboard/login';
   }
 
   if (!ready) {

@@ -31,10 +31,11 @@ export default function StarRating({ value = 0, onChange, max = 5, className }) 
             key={star}
             type="button"
             disabled={!interactive}
+            role={interactive ? 'radio' : undefined}
             aria-label={`${star} star${star !== 1 ? 's' : ''}`}
-            aria-pressed={star === value}
+            aria-checked={interactive ? star === value : undefined}
             className={cn(
-              'text-4xl leading-none transition-transform select-none',
+              'text-4xl leading-none transition-transform select-none rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-1',
               interactive && 'cursor-pointer hover:scale-110 active:scale-95',
               !interactive && 'cursor-default'
             )}

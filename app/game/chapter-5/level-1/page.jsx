@@ -135,8 +135,9 @@ export default function Level1Page() {
   }
 
   async function finishLevel() {
-    const totalScore     = responsesRef.current.reduce((s, r) => s + r.scorePoints, 0);
     const redFlagTriggered = literalCount.current >= PRETEND_CLIPS.length;
+    const totalScore = responsesRef.current.reduce((s, r) => s + r.scorePoints, 0)
+      + (redFlagTriggered ? 3 : 0);
 
     const sid = sessionIdRef.current;
     if (sid) {

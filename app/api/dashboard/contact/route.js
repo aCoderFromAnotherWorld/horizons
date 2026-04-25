@@ -1,12 +1,12 @@
-import { getAuthenticatedUser } from '@/lib/dashboardAuth.js';
+import { requireAdmin } from '@/lib/dashboardAuth.js';
 import { listContacts } from '@/lib/db/queries/contactSubmissions.js';
 
 const VALID_STATUSES = new Set(['new', 'read', 'archived']);
 
 export async function GET(request) {
-  const user = await getAuthenticatedUser(request);
-  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+  const result = await requireAdmin(request);
+  if (result?.error) return Response.json({ error: result.error }, { status: result.status });
+  const user = result;
 
   const { searchParams } = request.nextUrl;
   const status = searchParams.get('status');

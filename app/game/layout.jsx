@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
 import { useSettingsStore } from '@/store/settingsStore.js';
@@ -15,9 +15,10 @@ const SHELL_EXCLUDED = ['/game/start'];
 
 export default function GameLayout({ children }) {
   const pathname     = usePathname();
-  const router       = useRouter();
   const currentChapter = useGameStore((s) => s.currentChapter);
   const incrementBreak = useGameStore((s) => s.incrementBreak);
+  const sessionId      = useGameStore((s) => s.sessionId);
+  const breakCount     = useGameStore((s) => s.breakCount);
   const sensoryLevel   = useSettingsStore((s) => s.sensoryLevel);
 
   const theme      = getTheme(currentChapter);
@@ -31,6 +32,15 @@ export default function GameLayout({ children }) {
 
   function startBreak() {
     incrementBreak();
+    // Persist break count to DB (non-blocking)
+    const newCount = breakCount + 1;
+    if (sessionId) {
+      fetch(`/api/game/session/${sessionId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ breakCount: newCount }),
+      }).catch(() => {});
+    }
     setOnBreak(true);
     setBreakProgress(100);
 

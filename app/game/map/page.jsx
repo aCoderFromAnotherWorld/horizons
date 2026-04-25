@@ -36,18 +36,13 @@ export default function MapPage() {
   const playerName     = useGameStore((s) => s.playerName);
 
   function handleChapterTap(ch) {
-    if (ch.num > currentChapter) return; // locked
+    // Only allow entering the current chapter; completed and locked chapters are non-interactive.
+    if (ch.num !== currentChapter) return;
 
-    if (ch.num < currentChapter) {
-      // Completed chapter — go to first level for review
-      router.push(ch.firstUrl);
-    } else {
-      // Current chapter — go to current level
-      const url = ch.num === 6
-        ? '/game/chapter-6'
-        : `/game/chapter-${ch.num}/level-${currentLevel}`;
-      router.push(url);
-    }
+    const url = ch.num === 6
+      ? '/game/chapter-6'
+      : `/game/chapter-${ch.num}/level-${currentLevel}`;
+    router.push(url);
   }
 
   return (
@@ -101,10 +96,10 @@ export default function MapPage() {
               )}
 
               <motion.button
-                whileHover={!locked ? { scale: 1.05, y: -3 } : {}}
-                whileTap={!locked ? { scale: 0.95 } : {}}
+                whileHover={!locked && !completed ? { scale: 1.05, y: -3 } : {}}
+                whileTap={!locked && !completed ? { scale: 0.95 } : {}}
                 onClick={() => handleChapterTap(ch)}
-                disabled={locked}
+                disabled={locked || completed}
                 className="relative z-10 w-full flex flex-col items-center gap-2 rounded-3xl p-4 min-h-[140px] justify-center select-none transition-all"
                 style={{
                   background: locked
@@ -182,7 +177,7 @@ export default function MapPage() {
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, transition: { delay: 0.8 } }}
-        className="mt-8 text-white/50 text-xs text-center"
+        className="mt-8 text-white/70 text-xs text-center"
       >
         🌟 Complete each chapter to unlock the next adventure!
       </motion.p>

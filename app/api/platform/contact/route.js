@@ -9,10 +9,21 @@ export async function POST(request) {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { name, email, role, message } = body;
+  const { name, email, role, message, website } = body;
 
-  if (!email || typeof email !== 'string' || !email.includes('@')) {
+  // Honeypot — bots fill this field, humans do not
+  if (website) return Response.json({ ok: true }, { status: 201 });
+
+  const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!email || typeof email !== 'string' || !EMAIL_RE.test(email)) {
     return Response.json({ error: 'A valid email is required' }, { status: 400 });
+  }
+  if (name && (typeof name !== 'string' || name.length > 100)) {
+    return Response.json({ error: 'name must be at most 100 characters' }, { status: 400 });
+  }
+  const VALID_ROLES = ['caregiver', 'researcher', 'educator', 'developer', 'other'];
+  if (role && !VALID_ROLES.includes(role)) {
+    return Response.json({ error: 'Invalid role' }, { status: 400 });
   }
   if (!message || typeof message !== 'string') {
     return Response.json({ error: 'message is required' }, { status: 400 });

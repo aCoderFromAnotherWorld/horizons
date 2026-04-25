@@ -37,12 +37,20 @@ export function useMouseTracker(sessionId, taskKey, active) {
       }
     }
 
-    window.addEventListener('pointermove', onPointerMove);
-    intervalRef.current = setInterval(flush, FLUSH_INTERVAL_MS);
+    function onPointerMoveStartInterval(e) {
+      onPointerMove(e);
+      // Start interval only after the first point arrives
+      if (!intervalRef.current) {
+        intervalRef.current = setInterval(flush, FLUSH_INTERVAL_MS);
+      }
+    }
+
+    window.addEventListener('pointermove', onPointerMoveStartInterval);
 
     return () => {
-      window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointermove', onPointerMoveStartInterval);
       clearInterval(intervalRef.current);
+      intervalRef.current = null;
       flush(); // drain remaining buffer
     };
   }, [active, sessionId, taskKey]);

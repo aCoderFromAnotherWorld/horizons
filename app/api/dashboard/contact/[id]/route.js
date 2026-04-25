@@ -1,12 +1,11 @@
-import { getAuthenticatedUser } from '@/lib/dashboardAuth.js';
+import { requireAdmin } from '@/lib/dashboardAuth.js';
 import { updateContactStatus } from '@/lib/db/queries/contactSubmissions.js';
 
 const VALID_STATUSES = new Set(['new', 'read', 'archived']);
 
 export async function PATCH(request, { params }) {
-  const user = await getAuthenticatedUser(request);
-  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+  const result = await requireAdmin(request);
+  if (result?.error) return Response.json({ error: result.error }, { status: result.status });
 
   const { id } = await params;
 

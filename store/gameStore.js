@@ -16,9 +16,15 @@ export const useGameStore = create(
 
       setSession: (sessionData) =>
         set({
-          sessionId:   sessionData.sessionId,
-          playerAge:   sessionData.playerAge ?? null,
-          playerName:  sessionData.playerName ?? null,
+          sessionId:      sessionData.sessionId,
+          playerAge:      sessionData.playerAge ?? null,
+          playerName:     sessionData.playerName ?? null,
+          currentChapter: 1,
+          currentLevel:   1,
+          scores:         {},
+          redFlags:       [],
+          domainScores:   {},
+          breakCount:     0,
         }),
 
       goToChapter: (chapter, level = 1) =>
@@ -58,6 +64,6 @@ export const useGameStore = create(
           breakCount:     0,
         }),
     }),
-    { name: 'horizons-game' }
+    { name: 'horizons-game-v1' }
   )
 );

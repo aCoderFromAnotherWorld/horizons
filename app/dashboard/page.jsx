@@ -43,12 +43,12 @@ export default function OverviewPage() {
   }
 
   // Computed stats
-  const total      = sessions.length;
-  const completed  = sessions.filter(s => s.status === 'completed').length;
-  const compRate   = total > 0 ? Math.round((completed / total) * 100) : 0;
-  const avgScore   = completed > 0
-    ? (sessions.filter(s => s.status === 'completed' && s.combinedScore != null)
-        .reduce((s, x) => s + x.combinedScore, 0) / completed).toFixed(1)
+  const total     = sessions.length;
+  const completed = sessions.filter(s => s.status === 'completed').length;
+  const compRate  = total > 0 ? Math.round((completed / total) * 100) : 0;
+  const validScored = sessions.filter(s => s.status === 'completed' && s.combinedScore != null);
+  const avgScore    = validScored.length > 0
+    ? (validScored.reduce((acc, x) => acc + x.combinedScore, 0) / validScored.length).toFixed(1)
     : '—';
 
   // Risk distribution for pie chart
@@ -71,9 +71,8 @@ export default function OverviewPage() {
   }
   const avgDomainScores = Object.keys(domainTotals).map(domain => ({
     domain,
-    rawScore:  domainTotals[domain] / domainCounts[domain],
-    maxScore:  { social_communication: 100, restricted_repetitive: 70, pretend_play: 40, sensory_processing: 30 }[domain] ?? 100,
-    riskLevel: 'medium',
+    rawScore: domainTotals[domain] / domainCounts[domain],
+    maxScore: { social_communication: 100, restricted_repetitive: 70, pretend_play: 40, sensory_processing: 30 }[domain] ?? 100,
   }));
 
   const STAT_CARDS = [

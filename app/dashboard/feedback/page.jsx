@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Fragment } from 'react';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
 } from 'recharts';
@@ -161,9 +161,8 @@ export default function FeedbackPage() {
                 surveys.map(s => {
                   const isExpanded = expandedId === s.id;
                   return (
-                    <>
+                    <Fragment key={s.id}>
                       <TableRow
-                        key={s.id}
                         className={cn(
                           'cursor-pointer transition-colors',
                           isExpanded ? 'bg-indigo-50' : 'hover:bg-slate-50'
@@ -219,7 +218,7 @@ export default function FeedbackPage() {
                           </TableCell>
                         </TableRow>
                       )}
-                    </>
+                    </Fragment>
                   );
                 })
               )}

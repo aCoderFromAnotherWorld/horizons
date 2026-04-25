@@ -7,10 +7,10 @@ export default function PrintButton({ label = 'Save as PDF', className = '' }) {
 
   function handlePrint() {
     setPrinting(true);
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       window.print();
       setPrinting(false);
-    }, 80);
+    });
   }
 
   return (

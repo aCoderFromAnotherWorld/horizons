@@ -1,4 +1,7 @@
 import { insertSurvey } from '@/lib/db/queries/surveyResponses.js';
+import sql from '@/lib/db/index.js';
+
+const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
 
 export async function POST(request) {
   let body;
@@ -8,8 +11,22 @@ export async function POST(request) {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { role, rating, feedback } = body;
-  const sessionId = request.nextUrl.searchParams.get('session') ?? body.gameSessionId ?? null;
+  const { role, rating, feedback, website } = body;
+
+  // Honeypot — bots fill this field, humans do not
+  if (website) return Response.json({ ok: true }, { status: 201 });
+
+  let sessionId = request.nextUrl.searchParams.get('session') ?? body.gameSessionId ?? null;
+
+  // Validate sessionId format and existence; ignore if invalid to avoid FK violation
+  if (sessionId) {
+    if (!UUID_RE.test(sessionId)) {
+      sessionId = null;
+    } else {
+      const [row] = await sql`SELECT id FROM game_sessions WHERE id = ${sessionId} LIMIT 1`;
+      if (!row) sessionId = null;
+    }
+  }
 
   if (rating === undefined || rating === null) {
     return Response.json({ error: 'rating is required' }, { status: 400 });

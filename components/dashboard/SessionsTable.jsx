@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils.js';
+import { toast } from 'sonner';
 
 const PAGE_SIZE = 20;
 
@@ -85,9 +86,14 @@ export default function SessionsTable({ sessions = [], onDelete }) {
     setDeleting(confirmId);
     try {
       const res = await fetch(`/api/dashboard/sessions/${confirmId}`, { method: 'DELETE' });
-      if (res.ok) onDelete?.(confirmId);
+      if (res.ok) {
+        onDelete?.(confirmId);
+        toast.success('Session deleted');
+      } else {
+        toast.error('Failed to delete session');
+      }
     } catch {
-      // silent — session list will remain unchanged
+      toast.error('Failed to delete session');
     } finally {
       setDeleting(null);
       setConfirmId(null);
