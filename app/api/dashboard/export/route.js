@@ -78,9 +78,9 @@ export async function GET(request) {
           csvEscape(r.redFlags.map((f) => f.flag_type).join('|')),
         ].join(','));
       }
-      return new Response(lines.join('\r\n'), {
+      return new Response('﻿' + lines.join('\r\n'), {
         headers: {
-          'Content-Type': 'text/csv',
+          'Content-Type': 'text/csv; charset=utf-8',
           'Content-Disposition': 'attachment; filename="horizons-export.csv"',
         },
       });

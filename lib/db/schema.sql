@@ -10,7 +10,8 @@ CREATE TABLE IF NOT EXISTS game_sessions (
   current_level   INTEGER NOT NULL DEFAULT 1,
   status          TEXT NOT NULL DEFAULT 'active',
   avatar_data     JSONB,
-  report_token    TEXT
+  report_token    TEXT,
+  break_count     INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE IF NOT EXISTS task_responses (
@@ -44,7 +45,8 @@ CREATE TABLE IF NOT EXISTS chapter_scores (
   session_id  TEXT NOT NULL REFERENCES game_sessions(id) ON DELETE CASCADE,
   chapter_key TEXT NOT NULL,
   raw_points  INTEGER NOT NULL DEFAULT 0,
-  recorded_at BIGINT NOT NULL
+  recorded_at BIGINT NOT NULL,
+  UNIQUE (session_id, chapter_key)
 );
 CREATE INDEX IF NOT EXISTS idx_chapter_scores_session ON chapter_scores(session_id);
 

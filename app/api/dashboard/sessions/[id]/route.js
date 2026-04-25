@@ -1,4 +1,4 @@
-import { getAuthenticatedUser } from '@/lib/dashboardAuth.js';
+import { getAuthenticatedUser, requireAdmin } from '@/lib/dashboardAuth.js';
 import { getSession, deleteSession } from '@/lib/db/queries/sessions.js';
 import { getResponsesBySession } from '@/lib/db/queries/responses.js';
 import { getScoresBySession } from '@/lib/db/queries/scores.js';
@@ -30,8 +30,8 @@ export async function GET(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-  const user = await getAuthenticatedUser(request);
-  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  const user = await requireAdmin(request);
+  if (user?.error) return Response.json({ error: user.error }, { status: user.status });
 
   const { id } = await params;
 

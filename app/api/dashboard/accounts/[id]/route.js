@@ -1,10 +1,10 @@
-import { getAuthenticatedUser } from '@/lib/dashboardAuth.js';
+import { requireAdmin } from '@/lib/dashboardAuth.js';
 import { updateAccount } from '@/lib/db/queries/accounts.js';
 
 export async function PATCH(request, { params }) {
-  const user = await getAuthenticatedUser(request);
-  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+  const result = await requireAdmin(request);
+  if (result?.error) return Response.json({ error: result.error }, { status: result.status });
+  const user = result;
 
   const { id } = await params;
 
@@ -18,6 +18,11 @@ export async function PATCH(request, { params }) {
   const { isActive, role } = body;
   if (role !== undefined && !['researcher', 'admin'].includes(role)) {
     return Response.json({ error: 'Invalid role' }, { status: 400 });
+  }
+
+  // Prevent admins from demoting or deactivating themselves
+  if (id === user.id && (role === 'researcher' || isActive === false)) {
+    return Response.json({ error: 'You cannot demote or deactivate your own account' }, { status: 400 });
   }
 
   try {

@@ -35,14 +35,16 @@ function SurveyForm() {
   const searchParams = useSearchParams();
   const sessionId    = searchParams.get('session') ?? null;
 
-  const [role, setRole]         = useState('');
-  const [rating, setRating]     = useState(0);
+  const [role,     setRole]     = useState('');
+  const [rating,   setRating]   = useState(0);
   const [feedback, setFeedback] = useState('');
-  const [errors, setErrors]     = useState({});
-  const [status, setStatus]     = useState('idle'); // idle | loading | success | error
+  const [honeypot, setHoneypot] = useState('');
+  const [errors,   setErrors]   = useState({});
+  const [status,   setStatus]   = useState('idle'); // idle | loading | success | error
 
   async function handleSubmit(evt) {
     evt.preventDefault();
+    if (status === 'loading') return;
     const e = {};
     if (!rating) e.rating = 'Please select a star rating.';
     if (Object.keys(e).length) { setErrors(e); return; }
@@ -58,6 +60,7 @@ function SurveyForm() {
           rating,
           feedback: feedback.trim() || null,
           gameSessionId: sessionId,
+          website: honeypot,
         }),
       });
       if (!res.ok) throw new Error('server error');
@@ -105,6 +108,16 @@ function SurveyForm() {
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="space-y-6">
+        {/* Honeypot */}
+        <input
+          type="text"
+          name="website"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+          tabIndex={-1}
+          aria-hidden="true"
+          style={{ position: 'absolute', left: '-9999px' }}
+        />
         {/* Role */}
         <div className="space-y-1.5">
           <Label className="text-sm font-medium">

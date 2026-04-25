@@ -1,11 +1,10 @@
-import { getAuthenticatedUser } from '@/lib/dashboardAuth.js';
+import { requireAdmin } from '@/lib/dashboardAuth.js';
 import { listAccounts } from '@/lib/db/queries/accounts.js';
 import auth from '@/lib/auth.js';
 
 export async function GET(request) {
-  const user = await getAuthenticatedUser(request);
-  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+  const result = await requireAdmin(request);
+  if (result?.error) return Response.json({ error: result.error }, { status: result.status });
 
   try {
     const accounts = await listAccounts();
@@ -17,9 +16,8 @@ export async function GET(request) {
 }
 
 export async function POST(request) {
-  const user = await getAuthenticatedUser(request);
-  if (!user) return Response.json({ error: 'Unauthorized' }, { status: 401 });
-  if (user.role !== 'admin') return Response.json({ error: 'Forbidden' }, { status: 403 });
+  const result = await requireAdmin(request);
+  if (result?.error) return Response.json({ error: result.error }, { status: result.status });
 
   let body;
   try {
@@ -28,9 +26,12 @@ export async function POST(request) {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const { email, password, role = 'researcher' } = body;
+  const { email, password, name, role = 'researcher' } = body;
   if (!email || !password) {
     return Response.json({ error: 'email and password are required' }, { status: 400 });
+  }
+  if (typeof password !== 'string' || password.length < 8) {
+    return Response.json({ error: 'password must be at least 8 characters' }, { status: 400 });
   }
   if (!['researcher', 'admin'].includes(role)) {
     return Response.json({ error: 'Invalid role' }, { status: 400 });
@@ -38,7 +39,7 @@ export async function POST(request) {
 
   try {
     await auth.api.signUpEmail({
-      body: { email, password, name: email, role, is_active: true },
+      body: { email, password, name: name || email, role, is_active: true },
     });
     return Response.json({ ok: true });
   } catch (err) {

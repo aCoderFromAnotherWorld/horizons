@@ -36,10 +36,11 @@ function MessageDetail({ item, updating, onSetStatus }) {
     );
   }
 
+  const mailBody = `\n\n---\nOriginal message from ${item.name || item.email}:\n${item.message}`.slice(0, 500);
   const mailtoHref = [
-    `mailto:${item.email}`,
+    `mailto:${encodeURIComponent(item.email)}`,
     `?subject=${encodeURIComponent('Re: Horizons Contact')}`,
-    `&body=${encodeURIComponent(`\n\n---\nOriginal message from ${item.name || item.email}:\n${item.message}`)}`,
+    `&body=${encodeURIComponent(mailBody)}`,
   ].join('');
 
   return (
@@ -73,6 +74,8 @@ function MessageDetail({ item, updating, onSetStatus }) {
           </Button>
           <a
             href={mailtoHref}
+            target="_blank"
+            rel="noreferrer"
             className="inline-flex items-center justify-center rounded-md border border-slate-200 bg-white px-3 py-1.5 text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors"
           >
             Reply

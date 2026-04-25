@@ -67,8 +67,15 @@ function NavBar() {
           </Link>
         </div>
 
-        {/* Mobile hamburger */}
-        <div className="sm:hidden">
+        {/* Mobile Start pill — always visible */}
+        <div className="sm:hidden flex items-center gap-2">
+          <Link
+            href="/game/start"
+            className="inline-flex items-center justify-center rounded-xl font-semibold text-sm px-4 py-2 text-white"
+            style={{ background: '#2f4abf' }}
+          >
+            Start →
+          </Link>
           <Sheet>
             <SheetTrigger asChild>
               <Button variant="ghost" size="icon" className="h-10 w-10">

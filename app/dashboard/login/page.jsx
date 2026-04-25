@@ -1,18 +1,22 @@
 'use client';
 
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useState, Suspense } from 'react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 
-export default function LoginPage() {
-  const router = useRouter();
-  const [email, setEmail] = useState('');
+function LoginForm() {
+  const router       = useRouter();
+  const searchParams = useSearchParams();
+  const next         = searchParams.get('next') ?? '/dashboard';
+
+  const [email,    setEmail]    = useState('');
   const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [error,    setError]    = useState('');
+  const [loading,  setLoading]  = useState(false);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -28,27 +32,29 @@ export default function LoginPage() {
       });
 
       if (res.status === 429) {
+        setPassword('');
         setError('Too many failed attempts. Please wait 15 minutes before trying again.');
         setLoading(false);
         return;
       }
 
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        setError(data.message || data.error || 'Invalid email or password.');
+        setPassword('');
+        setError('Invalid email or password.');
         setLoading(false);
         return;
       }
 
-      router.replace('/dashboard');
+      router.replace(next);
     } catch {
+      setPassword('');
       setError('Something went wrong. Please try again.');
       setLoading(false);
     }
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-slate-50 px-4">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-4 gap-4">
       <Card className="w-full max-w-sm">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl">Horizons Dashboard</CardTitle>
@@ -90,6 +96,20 @@ export default function LoginPage() {
           </form>
         </CardContent>
       </Card>
+      <Link
+        href="/"
+        className="text-sm text-slate-500 hover:text-slate-800 transition-colors"
+      >
+        ← Back to Horizons
+      </Link>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={null}>
+      <LoginForm />
+    </Suspense>
   );
 }

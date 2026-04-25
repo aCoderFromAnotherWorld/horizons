@@ -19,10 +19,10 @@ export default function ExportMenu({ baseUrl = '/api/dashboard/export' }) {
   function handlePrintPDF() {
     setOpen(false);
     setPrinting(true);
-    setTimeout(() => {
+    requestAnimationFrame(() => {
       window.print();
       setPrinting(false);
-    }, 120);
+    });
   }
 
   return (

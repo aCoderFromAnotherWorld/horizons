@@ -25,7 +25,7 @@ const STEPS = [
     emoji: '📋',
     title: 'Report',
     description:
-      "Caregiver receives a friendly, plain-language screening summary with domain-level insights and recommended next steps. Always consult a qualified professional.",
+      "Caregiver views a friendly, plain-language screening summary with domain-level insights and recommended next steps. Always consult a qualified professional.",
     color: '#B45309',
     bg: '#FFFBEB',
     border: '#FDE68A',
@@ -72,7 +72,7 @@ export default function HowItWorks() {
             <motion.div key={step.title} variants={cardVariant} className="relative">
               {i < STEPS.length - 1 && (
                 <div
-                  className="hidden md:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center text-xl select-none font-bold"
+                  className="hidden lg:flex absolute -right-5 top-1/2 -translate-y-1/2 z-10 w-10 h-10 items-center justify-center text-xl select-none font-bold"
                   aria-hidden="true"
                   style={{ color: '#94A3B8' }}
                 >

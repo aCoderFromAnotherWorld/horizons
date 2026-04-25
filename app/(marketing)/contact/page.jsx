@@ -33,9 +33,12 @@ export default function ContactPage() {
   const [errors, setErrors]   = useState({});
   const [status, setStatus]   = useState('idle'); // idle | loading | success | error
 
+  const [honeypot, setHoneypot] = useState('');
+
   function validate() {
+    const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const e = {};
-    if (!email.trim() || !email.includes('@')) e.email = 'A valid email is required.';
+    if (!email.trim() || !EMAIL_RE.test(email.trim())) e.email = 'A valid email is required.';
     if (message.trim().length < MIN_MSG) e.message = `Message must be at least ${MIN_MSG} characters.`;
     if (message.trim().length > MAX_MSG) e.message = `Message must be at most ${MAX_MSG} characters.`;
     return e;
@@ -43,6 +46,7 @@ export default function ContactPage() {
 
   async function handleSubmit(evt) {
     evt.preventDefault();
+    if (status === 'loading') return;
     const e = validate();
     if (Object.keys(e).length) { setErrors(e); return; }
     setErrors({});
@@ -52,7 +56,7 @@ export default function ContactPage() {
       const res = await fetch('/api/platform/contact', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: name.trim() || null, email, role: role || null, message }),
+        body: JSON.stringify({ name: name.trim() || null, email, role: role || null, message, website: honeypot }),
       });
       if (!res.ok) throw new Error('server error');
       setStatus('success');
@@ -74,6 +78,12 @@ export default function ContactPage() {
           <p className="text-slate-500 text-base">
             Thank you for reaching out. We&apos;ll get back to you as soon as possible.
           </p>
+          <button
+            onClick={() => { setStatus('idle'); setName(''); setEmail(''); setRole(''); setMessage(''); setErrors({}); }}
+            className="mt-6 text-sm text-indigo-600 hover:text-indigo-800 underline"
+          >
+            Send another message
+          </button>
         </motion.div>
       </div>
     );
@@ -90,6 +100,16 @@ export default function ContactPage() {
       </div>
 
       <form onSubmit={handleSubmit} noValidate className="space-y-5">
+        {/* Honeypot */}
+        <input
+          type="text"
+          name="website"
+          value={honeypot}
+          onChange={(e) => setHoneypot(e.target.value)}
+          tabIndex={-1}
+          aria-hidden="true"
+          style={{ position: 'absolute', left: '-9999px' }}
+        />
         {/* Name */}
         <div className="space-y-1.5">
           <Label htmlFor="name" className="text-sm font-medium">

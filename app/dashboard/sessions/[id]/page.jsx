@@ -16,6 +16,7 @@ import DomainRadarChart from '@/components/dashboard/DomainRadarChart.jsx';
 import ResponseTimeChart from '@/components/dashboard/ResponseTimeChart.jsx';
 import RedFlagList from '@/components/dashboard/RedFlagList.jsx';
 import MouseHeatmap from '@/components/dashboard/MouseHeatmap.jsx';
+import { calculateCombinedScore } from '@/lib/scoring/engine.js';
 import { cn } from '@/lib/utils.js';
 
 const STATUS_STYLES = {
@@ -110,7 +111,11 @@ export default function SessionDetailPage({ params }) {
   const { session, taskResponses = [], chapterScores = [], redFlags = [], domainScores = [] } = data;
 
   const combinedScore = domainScores.length
-    ? domainScores.reduce((s, ds) => s + (ds.weighted_score ?? 0), 0) / domainScores.length
+    ? (() => {
+        const domainRaw = {};
+        for (const ds of domainScores) domainRaw[ds.domain] = ds.raw_score;
+        return calculateCombinedScore(domainRaw, []);
+      })()
     : null;
 
   const domainScoresMapped = domainScores.map(ds => ({

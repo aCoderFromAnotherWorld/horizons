@@ -10,6 +10,7 @@ import {
   getDomainRisk,
   checkConsistency,
 } from '@/lib/scoring/engine.js';
+import { detectRedFlags } from '@/lib/scoring/redFlags.js';
 import { generateReportToken } from '@/lib/reportToken.js';
 
 export async function GET(request, { params }) {
@@ -28,9 +29,13 @@ export async function GET(request, { params }) {
       domainRaw[domain] = (domainRaw[domain] ?? 0) + row.raw_points;
     }
 
-    // 2. Load active red flags from the red_flags table
-    const redFlagRows = await getRedFlagsBySession(sessionId);
-    const activeRedFlags = redFlagRows.map((r) => r.flag_type);
+    // 2. Load active red flags from the red_flags table + re-derive from responses
+    const [redFlagRows, allResponses] = await Promise.all([
+      getRedFlagsBySession(sessionId),
+      getResponsesBySession(sessionId),
+    ]);
+    const derivedFlags = detectRedFlags({ taskResponses: allResponses, redFlags: redFlagRows });
+    const activeRedFlags = derivedFlags;
 
     // 3. Calculate combined score and risk
     const combinedScore = calculateCombinedScore(domainRaw, activeRedFlags);
@@ -61,7 +66,6 @@ export async function GET(request, { params }) {
     );
 
     // 5. Consistency check: compare ch6 vs original task performance
-    const allResponses = await getResponsesBySession(sessionId);
     const ch6Responses  = allResponses.filter((r) => r.chapter === 6);
     const origResponses = allResponses.filter((r) => r.chapter >= 1 && r.chapter <= 5);
     const consistencyFlag = checkConsistency(ch6Responses, origResponses);

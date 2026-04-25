@@ -20,6 +20,7 @@ const TOTAL_STEPS = 4;
 export default function StartPage() {
   const router = useRouter();
   const setSession    = useGameStore((s) => s.setSession);
+  const resetGame     = useGameStore((s) => s.reset);
   const setGuideEmoji = useSettingsStore((s) => s.setGuideEmoji);
   const setSensory    = useSettingsStore((s) => s.setSensoryLevel);
   const sensoryLevel  = useSettingsStore((s) => s.sensoryLevel);
@@ -78,6 +79,7 @@ export default function StartPage() {
       if (!res.ok) throw new Error('Failed to create session');
       const { sessionId } = await res.json();
 
+      resetGame();
       setSession({ sessionId, playerAge: age, playerName: name.trim() || null });
       setGuideEmoji(guide);
       setSensory(sensoryLevel);

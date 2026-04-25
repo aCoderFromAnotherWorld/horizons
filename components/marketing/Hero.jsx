@@ -37,14 +37,14 @@ export default function Hero() {
         }}
       />
 
-      {/* Floating emoji */}
+      {/* Floating emoji — hidden on mobile to avoid overlapping the centred card */}
       {EMOJI_ITEMS.map(({ emoji, x, y, delay, size }) => (
         <motion.div
           key={`${emoji}-${x}`}
           initial={{ scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 0.65 }}
           transition={{ delay, type: 'spring', stiffness: 260, damping: 20 }}
-          className="absolute select-none pointer-events-none"
+          className="hidden sm:block absolute select-none pointer-events-none"
           style={{ left: x, top: y }}
         >
           <motion.span

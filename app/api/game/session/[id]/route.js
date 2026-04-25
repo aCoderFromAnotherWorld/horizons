@@ -23,7 +23,7 @@ export async function PATCH(request, { params }) {
     return Response.json({ error: 'Invalid JSON' }, { status: 400 });
   }
 
-  const allowed = ['currentChapter', 'currentLevel', 'status', 'avatarData'];
+  const allowed = ['currentChapter', 'currentLevel', 'status', 'avatarData', 'breakCount'];
   const updates = {};
   for (const key of allowed) {
     if (body[key] !== undefined) updates[key] = body[key];

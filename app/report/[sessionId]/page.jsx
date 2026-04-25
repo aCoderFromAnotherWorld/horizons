@@ -58,7 +58,7 @@ const RISK_DISPLAY = {
     border: '#FECACA',
     badge: '🔴',
     short: 'Significant Differences',
-    desc: 'Significant differences were observed in this area. Please consult a qualified specialist as soon as possible.',
+    desc: 'Significant differences were observed in this area. We recommend consulting a qualified specialist for further assessment.',
   },
 };
 
@@ -102,7 +102,11 @@ export default async function ReportPage({ params, searchParams }) {
     return <ErrorPage message="Session not found. This report may have been removed." />;
   }
 
-  const completedAt = session.completed_at ?? session.started_at;
+  if (!session.completed_at) {
+    return <ErrorPage message="Results are not yet available. Please complete the game first, then return to this link." />;
+  }
+
+  const completedAt = session.completed_at;
   if (!token || !verifyReportToken(sessionId, completedAt, token)) {
     return <ErrorPage message="This report link is invalid or has expired. Please use the link provided at the end of the game." />;
   }
