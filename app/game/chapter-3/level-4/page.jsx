@@ -178,7 +178,7 @@ export default function Level4Page() {
 
     setComplete(true);
     await delayMs(2000);
-    goToChapter(3, 5);
+    goToChapter(4, 1);
     router.push('/game/map');
   }
 

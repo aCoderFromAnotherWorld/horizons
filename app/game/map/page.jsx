@@ -43,9 +43,10 @@ export default function MapPage() {
       router.push(ch.firstUrl);
     } else {
       // Current chapter — go to current level
+      const safeLevel = Math.min(Math.max(currentLevel, 1), ch.levels);
       const url = ch.num === 6
         ? '/game/chapter-6'
-        : `/game/chapter-${ch.num}/level-${currentLevel}`;
+        : `/game/chapter-${ch.num}/level-${safeLevel}`;
       router.push(url);
     }
   }
