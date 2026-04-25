@@ -13,12 +13,6 @@
 # testing
 /coverage
 
-# local sqlite runtime data
-horizons.db
-horizons.db-*
-*.db
-*.db-*
-
 # next.js
 /.next/
 /out/
@@ -27,7 +21,7 @@ horizons.db-*
 /build
 
 # misc
-.DS_Store
+**/.DS_Store
 *.pem
 
 # debug
@@ -38,6 +32,11 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env
+.env.local
+.env*.local
+
+# project db
+horizons.db
 
 # vercel
 .vercel
@@ -46,4 +45,11 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-**/.DS_Store
+# Claude
+docs/
+.claude*/
+.agents*/
+.mcp.json
+AGENTS.md
+CLAUDE.md
+skills-lock.json
