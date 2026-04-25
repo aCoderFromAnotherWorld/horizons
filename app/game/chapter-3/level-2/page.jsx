@@ -12,6 +12,25 @@ import { CONVO_EXCHANGES, TOM_PROBE } from '@/lib/gameData/chapter3.js';
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
 function now() { return Date.now(); }
 
+function seededShuffle(seed, items) {
+  let state = 0;
+  for (let i = 0; i < seed.length; i++) {
+    state = (state * 31 + seed.charCodeAt(i)) >>> 0;
+  }
+
+  const next = () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 0x100000000;
+  };
+
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(next() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 /**
  * Score a conversation response.
  * Returns { pts, isCorrect }
@@ -56,6 +75,9 @@ export default function Level2Page() {
 
   const exchange = CONVO_EXCHANGES[exchIdx];
   const isTom    = exchange?.isTom === true;
+  const displayedOptions = exchange
+    ? seededShuffle(`${sessionId ?? 'guest'}:${exchange.taskKey}`, exchange.options)
+    : [];
 
   async function handleOptionTap(option) {
     if (tapped || complete) return;
@@ -183,7 +205,7 @@ export default function Level2Page() {
           <p className="text-white text-xl font-bold leading-relaxed">{TOM_PROBE.question}</p>
         </div>
         <div className="flex flex-col gap-3 w-full">
-          {exchange.options.map((opt, i) => (
+          {displayedOptions.map((opt, i) => (
             <motion.button
               key={opt.text + i}
               initial={{ opacity: 0, y: 16 }}
@@ -260,7 +282,7 @@ export default function Level2Page() {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex flex-col gap-3"
                 >
-                  {exchange?.options.map((opt, i) => (
+                  {displayedOptions.map((opt, i) => (
                     <motion.button
                       key={opt.text + i}
                       initial={{ opacity: 0, x: 20 }}

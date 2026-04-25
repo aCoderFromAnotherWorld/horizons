@@ -20,6 +20,25 @@ function scoreRegulation(type, slow) {
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
 function now() { return Date.now(); }
 
+function seededShuffle(seed, items) {
+  let state = 0;
+  for (let i = 0; i < seed.length; i++) {
+    state = (state * 31 + seed.charCodeAt(i)) >>> 0;
+  }
+
+  const next = () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 0x100000000;
+  };
+
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(next() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 const OPTION_COLORS = {
   appropriate: { bg: 'rgba(16,185,129,0.25)', border: 'rgba(16,185,129,0.6)', hover: 'rgba(16,185,129,0.4)' },
   avoidant:    { bg: 'rgba(245,158,11,0.2)',  border: 'rgba(245,158,11,0.5)',  hover: 'rgba(245,158,11,0.35)' },
@@ -144,6 +163,9 @@ export default function Level3Page() {
   }
 
   const scenario = REGULATION_SCENARIOS[scenarioIdx];
+  const displayedOptions = scenario
+    ? seededShuffle(`${sessionId ?? 'guest'}:${scenario.taskKey}`, scenario.options)
+    : [];
 
   return (
     <SceneCanvas chapterNumber={2}>
@@ -208,7 +230,7 @@ export default function Level3Page() {
             <p className="text-white/80 text-sm font-semibold text-center mb-1">
               What would you do? 🤔
             </p>
-            {scenario.options.map((opt, i) => {
+            {displayedOptions.map((opt, i) => {
               const colors = OPTION_COLORS[opt.type];
               return (
                 <motion.button
