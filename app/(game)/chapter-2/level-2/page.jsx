@@ -51,7 +51,8 @@ export default function Chapter2Level2Page() {
   const [trialIndex, setTrialIndex] = useState(0);
   const [totalPoints, setTotalPoints] = useState(0);
   const [feedback, setFeedback] = useState(null);
-  const trial = expressionTrials[trialIndex];
+  const trials = useMemo(() => shuffleArray(expressionTrials), []);
+  const trial = trials[trialIndex];
   const audioOptions = useMemo(() => ({}), []);
   const shuffledOptions = useMemo(
     () => shuffleArray(trial?.options || []),
@@ -116,7 +117,7 @@ export default function Chapter2Level2Page() {
     });
 
     setTimeout(async () => {
-      if (trialIndex + 1 >= expressionTrials.length) {
+      if (trialIndex + 1 >= trials.length) {
         await fetch("/api/score", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -147,7 +148,7 @@ export default function Chapter2Level2Page() {
       />
       <div className="rounded-2xl bg-white/90 px-8 py-6 shadow-xl">
         <p className="text-sm font-black uppercase text-indigo-700">
-          Trial {trialIndex + 1} of {expressionTrials.length}
+          Trial {trialIndex + 1} of {trials.length}
         </p>
         <h1 className="mt-2 text-5xl font-black capitalize text-zinc-900">
           Show {trial.emotion}

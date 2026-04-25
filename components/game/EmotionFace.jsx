@@ -31,9 +31,7 @@ export default function EmotionFace({
 
   return (
     <div
-      className={`grid aspect-square place-items-center overflow-hidden rounded-2xl p-3 ${
-        EMOTION_COLORS[emotion] || EMOTION_COLORS.neutral
-      } ${className}`}
+      className={`grid aspect-[5/7] place-items-center overflow-hidden rounded-2xl p-3 bg-green-300 ${className}`}
     >
       {!failed ? (
         <div className="relative h-full w-full">
