@@ -46,7 +46,7 @@ horizons.db
 next-env.d.ts
 
 # Claude
-docs/
+draft/
 .claude*/
 .agents*/
 .mcp.json
