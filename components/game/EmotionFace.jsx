@@ -31,19 +31,20 @@ export default function EmotionFace({
 
   return (
     <div
-      className={`grid aspect-square place-items-center rounded-2xl ${
+      className={`grid aspect-square place-items-center overflow-hidden rounded-2xl p-3 ${
         EMOTION_COLORS[emotion] || EMOTION_COLORS.neutral
       } ${className}`}
     >
       {!failed ? (
-        <SafeImage
-          src={imagePath}
-          alt={alt}
-          width={180}
-          height={180}
-          className="h-full w-full object-contain p-2"
-          onError={() => setFailed(true)}
-        />
+        <div className="relative h-full w-full">
+          <SafeImage
+            src={imagePath}
+            alt={alt}
+            fill
+            className="object-contain object-center"
+            onError={() => setFailed(true)}
+          />
+        </div>
       ) : (
         <span className={size}>{EMOTION_EMOJIS[emotion] || EMOTION_EMOJIS.neutral}</span>
       )}

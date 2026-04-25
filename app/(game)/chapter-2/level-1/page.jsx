@@ -261,6 +261,7 @@ function EmotionCard({ card }) {
   });
   const style = { transform: CSS.Translate.toString(transform) };
   const emotion = getCardEmotion(card);
+  const isFaceCard = card.imagePath.includes("/emotions/");
 
   return (
     <button
@@ -273,13 +274,15 @@ function EmotionCard({ card }) {
       {...listeners}
       {...attributes}
     >
-      {card.imagePath.includes("/emotions/") ? (
-        <EmotionFace
-          emotion={emotion}
-          imagePath={card.imagePath}
-          alt={card.altText || card.description}
-          className="h-32 w-full"
-        />
+      {isFaceCard ? (
+        <div className="flex min-h-40 items-center justify-center">
+          <EmotionFace
+            emotion={emotion}
+            imagePath={card.imagePath}
+            alt={card.altText || card.description}
+            className="h-32 w-32 sm:h-36 sm:w-36"
+          />
+        </div>
       ) : (
         <SafeImage
           src={card.imagePath}
@@ -289,9 +292,11 @@ function EmotionCard({ card }) {
           className="mx-auto h-28 w-28 object-contain"
         />
       )}
-      <p className="mt-2 text-center text-sm font-bold text-zinc-700">
-        {card.description || card.altText}
-      </p>
+      {!isFaceCard ? (
+        <p className="mt-2 text-center text-sm font-bold text-zinc-700">
+          {card.description || card.altText}
+        </p>
+      ) : null}
     </button>
   );
 }

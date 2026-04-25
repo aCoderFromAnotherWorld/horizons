@@ -468,7 +468,7 @@ export default function Chapter1Level2Page() {
                     src={guide.pointImage || guide.image}
                     alt={guide.name}
                     width={240}
-                    height={280}
+                    height={240}
                     className="relative z-10 h-32 w-24 object-contain sm:h-44 sm:w-32"
                   />
                 </div>
