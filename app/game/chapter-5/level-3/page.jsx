@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect , useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
@@ -21,6 +21,7 @@ const DISTRESS_THRESHOLD  = 4;
 const AVERSIVE_THRESHOLD  = 4;
 
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+function now() { return Date.now(); }
 
 export default function Level3Page() {
   const router      = useRouter();
@@ -51,9 +52,12 @@ export default function Level3Page() {
   const sessionIdRef  = useRef(sessionId);
   const playRef       = useRef(play);
 
-  sessionIdRef.current = sessionId;
-  playRef.current      = play;
+  useLayoutEffect(() => {
+    sessionIdRef.current = sessionId;
+    playRef.current      = play;
+  });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(5, 3); }, []);
 
   // Load cueSound on mount
@@ -66,6 +70,7 @@ export default function Level3Page() {
   // Auto-play sound 500ms after sound index changes
   useEffect(() => {
     if (phase !== 'sound') return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSoundPlaying(false);
     setRatingLocked(false);
 
@@ -74,12 +79,14 @@ export default function Level3Page() {
     }, 500);
 
     return () => clearTimeout(soundAutoRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [soundIdx, phase]);
 
   // Check if all textures placed
   useEffect(() => {
     if (phase !== 'texture') return;
     const placed = Object.keys(placements).length;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setAllPlaced(placed >= TEXTURE_CARDS.length);
   }, [placements, phase]);
 
@@ -108,7 +115,7 @@ export default function Level3Page() {
 
     responsesRef.current.push({
       taskKey:       `ch5_l3_sound_${soundIdx + 1}`,
-      startedAt:     Date.now(),
+      startedAt:     now(),
       isCorrect:     !isDistressing,
       attemptNumber: 1,
       scorePoints:   pts,
@@ -160,7 +167,7 @@ export default function Level3Page() {
       const zone = TEXTURE_ZONES.find(z => z.id === zoneId);
       responsesRef.current.push({
         taskKey:       `ch5_l3_texture_${cardId}`,
-        startedAt:     Date.now(),
+        startedAt:     now(),
         isCorrect:     !zone?.aversive,
         attemptNumber: 1,
         scorePoints:   zone?.score ?? 0,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect , useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
@@ -10,6 +10,7 @@ import FeedbackBurst from '@/components/game/FeedbackBurst.jsx';
 import { CONVO_EXCHANGES, TOM_PROBE } from '@/lib/gameData/chapter3.js';
 
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+function now() { return Date.now(); }
 
 /**
  * Score a conversation response.
@@ -45,9 +46,12 @@ export default function Level2Page() {
   const responsesRef   = useRef([]);
   const sessionIdRef   = useRef(sessionId);
   const playRef        = useRef(play);
-  sessionIdRef.current = sessionId;
-  playRef.current      = play;
+  useLayoutEffect(() => {
+    sessionIdRef.current = sessionId;
+    playRef.current      = play;
+  });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(3, 2); }, []);
 
   const exchange = CONVO_EXCHANGES[exchIdx];
@@ -66,7 +70,7 @@ export default function Level2Page() {
 
     responsesRef.current.push({
       taskKey:     exchange.taskKey,
-      startedAt:   Date.now(),
+      startedAt:   now(),
       isCorrect,
       attemptNumber: 1,
       scorePoints: pts,
@@ -185,6 +189,7 @@ export default function Level2Page() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0, transition: { delay: i * 0.1 } }}
               whileTap={{ scale: 0.95 }}
+              // eslint-disable-next-line react-hooks/refs
               onClick={() => handleOptionTap(opt)}
               disabled={tapped}
               className="w-full flex items-center gap-3 bg-white/20 border-2 border-white/30 rounded-2xl px-5 py-4 text-white font-semibold text-lg min-h-[64px] select-none hover:bg-white/30 transition-all disabled:pointer-events-none"

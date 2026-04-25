@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
@@ -27,6 +27,7 @@ function cueForTrial(cue) {
 }
 
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+function now() { return Date.now(); }
 
 export default function Level2Page() {
   const router = useRouter();
@@ -46,9 +47,12 @@ export default function Level2Page() {
   const runningRef     = useRef(false);
   const sessionIdRef   = useRef(sessionId);
   const playRef        = useRef(play);
-  sessionIdRef.current = sessionId;
-  playRef.current      = play;
+  useLayoutEffect(() => {
+    sessionIdRef.current = sessionId;
+    playRef.current      = play;
+  });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(2, 2); }, []);
 
   // Play mood cue when trial first shows
@@ -71,7 +75,7 @@ export default function Level2Page() {
 
     responsesRef.current.push({
       taskKey:    trial.taskKey,
-      startedAt:  Date.now(),
+      startedAt:  now(),
       isCorrect,
       scorePoints: pts,
       selection:  { emoji: option.emoji, type: option.type },

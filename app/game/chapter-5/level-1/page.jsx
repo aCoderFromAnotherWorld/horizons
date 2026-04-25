@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect , useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
@@ -16,6 +16,7 @@ const TIMEOUT_MS    = 8000;
 const FRAME_DELAY   = 800;  // ms between each animation frame
 
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+function now() { return Date.now(); }
 
 export default function Level1Page() {
   const router      = useRouter();
@@ -42,15 +43,19 @@ export default function Level1Page() {
   const sessionIdRef = useRef(sessionId);
   const playRef      = useRef(play);
 
-  sessionIdRef.current = sessionId;
-  playRef.current      = play;
+  useLayoutEffect(() => {
+    sessionIdRef.current = sessionId;
+    playRef.current      = play;
+  });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(5, 1); }, []);
 
   // Run frame animation for current clip
   useEffect(() => {
     if (showPractice || complete || animDone) return;
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setFrameIdx(0);
     setAnimDone(false);
 
@@ -65,7 +70,7 @@ export default function Level1Page() {
       } else {
         // All frames shown — reveal answer buttons + start timeout
         setAnimDone(true);
-        startedAtRef.current = Date.now();
+        startedAtRef.current = now();
         timeoutRef.current = setTimeout(() => {
           handleAnswer(null); // timeout
         }, TIMEOUT_MS);
@@ -78,6 +83,7 @@ export default function Level1Page() {
       clearTimeout(animRef.current);
       clearTimeout(timeoutRef.current);
     };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [clipIdx, clipKey, showPractice, complete]);
 
   function handleAnswer(type) {
@@ -86,7 +92,7 @@ export default function Level1Page() {
     clearTimeout(animRef.current);
     setAnswered(true);
 
-    const elapsed  = startedAtRef.current ? Date.now() - startedAtRef.current : TIMEOUT_MS;
+    const elapsed  = startedAtRef.current ? now() - startedAtRef.current : TIMEOUT_MS;
     const timedOut = type === null;
     const isLiteral = type === 'literal';
     const isCorrect = type === 'pretend';
@@ -98,7 +104,7 @@ export default function Level1Page() {
 
     responsesRef.current.push({
       taskKey:       PRETEND_CLIPS[clipIdx].taskKey,
-      startedAt:     startedAtRef.current ?? Date.now(),
+      startedAt:     startedAtRef.current ?? now(),
       responseTimeMs: timedOut ? null : elapsed,
       isCorrect,
       attemptNumber: 1,

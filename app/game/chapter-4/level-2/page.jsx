@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback , useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
@@ -15,6 +15,7 @@ const SCENE_A_SLOW_MS = 8000;
 const SCENE_B_SLOW_MS = 12000;
 
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+function now() { return Date.now(); }
 
 export default function Level2Page() {
   const router      = useRouter();
@@ -40,21 +41,24 @@ export default function Level2Page() {
   const sessionIdRef       = useRef(sessionId);
   const playRef            = useRef(play);
 
-  sessionIdRef.current = sessionId;
-  playRef.current      = play;
+  useLayoutEffect(() => {
+    sessionIdRef.current = sessionId;
+    playRef.current      = play;
+  });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(4, 2); }, []);
 
   // Scene A — start timer when round changes
   useEffect(() => {
     if (scene !== 'A' || showNew) return;
-    roundStartRef.current = Date.now();
+    roundStartRef.current = now();
   }, [scene, roundIdx, showNew]);
 
   // Scene B — start timer when scenario changes
   useEffect(() => {
     if (scene !== 'B') return;
-    scenarioStartRef.current = Date.now();
+    scenarioStartRef.current = now();
   }, [scene, scenarioIdx]);
 
   // --- Scene A handlers ---
@@ -64,7 +68,7 @@ export default function Level2Page() {
     setLocked(true);
     setSelectedActivity(actId);
 
-    const elapsedMs = roundStartRef.current ? Date.now() - roundStartRef.current : 0;
+    const elapsedMs = roundStartRef.current ? now() - roundStartRef.current : 0;
     const tooSlow   = elapsedMs > SCENE_A_SLOW_MS;
     activityHistory.current.push(actId);
 
@@ -72,7 +76,7 @@ export default function Level2Page() {
 
     responsesRef.current.push({
       taskKey:       `ch4_l2_activity_${roundIdx + 1}`,
-      startedAt:     roundStartRef.current ?? Date.now(),
+      startedAt:     roundStartRef.current ?? now(),
       responseTimeMs: elapsedMs,
       isCorrect:     !tooSlow,
       attemptNumber: 1,
@@ -107,53 +111,11 @@ export default function Level2Page() {
       setRoundIdx(next);
       setShowNew(false);
       setSelectedActivity(null);
-      roundStartRef.current = Date.now();
+      roundStartRef.current = now();
     }
   }
 
   // --- Scene B handlers ---
-
-  const handleScenarioAnswer = useCallback((optType) => {
-    if (locked) return;
-    setLocked(true);
-
-    const elapsedMs = scenarioStartRef.current ? Date.now() - scenarioStartRef.current : 0;
-    const tooSlow   = elapsedMs > SCENE_B_SLOW_MS;
-
-    let pts = 0;
-    if (optType === 'flexible') pts = 0;
-    else if (optType === 'distress') pts = 2;
-    else if (optType === 'rigid')    pts = 3;
-    if (tooSlow) pts += 1;
-
-    const isCorrect = optType === 'flexible';
-    setFeedback({ show: true, correct: isCorrect });
-    playRef.current(isCorrect ? 'cueCorrect' : 'cueWrong');
-
-    const scenario = UNEXPECTED_SCENARIOS[scenarioIdx];
-    responsesRef.current.push({
-      taskKey:       scenario.taskKey,
-      startedAt:     scenarioStartRef.current ?? Date.now(),
-      responseTimeMs: elapsedMs,
-      isCorrect,
-      attemptNumber: 1,
-      scorePoints:   pts,
-      selection:     { type: optType, tooSlow },
-    });
-    totalScoreRef.current += pts;
-
-    setTimeout(() => {
-      setFeedback({ show: false, correct: true });
-      setLocked(false);
-      const next = scenarioIdx + 1;
-      if (next >= UNEXPECTED_SCENARIOS.length) {
-        finishLevel();
-      } else {
-        setScenarioIdx(next);
-        scenarioStartRef.current = Date.now();
-      }
-    }, 800);
-  }, [locked, scenarioIdx]);
 
   async function finishLevel() {
     setScene('complete');
@@ -182,6 +144,49 @@ export default function Level2Page() {
     goToChapter(4, 3);
     router.push('/game/chapter-4/level-3');
   }
+
+  const handleScenarioAnswer = useCallback((optType) => {
+    if (locked) return;
+    setLocked(true);
+
+    const elapsedMs = scenarioStartRef.current ? now() - scenarioStartRef.current : 0;
+    const tooSlow   = elapsedMs > SCENE_B_SLOW_MS;
+
+    let pts = 0;
+    if (optType === 'flexible') pts = 0;
+    else if (optType === 'distress') pts = 2;
+    else if (optType === 'rigid')    pts = 3;
+    if (tooSlow) pts += 1;
+
+    const isCorrect = optType === 'flexible';
+    setFeedback({ show: true, correct: isCorrect });
+    playRef.current(isCorrect ? 'cueCorrect' : 'cueWrong');
+
+    const scenario = UNEXPECTED_SCENARIOS[scenarioIdx];
+    responsesRef.current.push({
+      taskKey:       scenario.taskKey,
+      startedAt:     scenarioStartRef.current ?? now(),
+      responseTimeMs: elapsedMs,
+      isCorrect,
+      attemptNumber: 1,
+      scorePoints:   pts,
+      selection:     { type: optType, tooSlow },
+    });
+    totalScoreRef.current += pts;
+
+    setTimeout(() => {
+      setFeedback({ show: false, correct: true });
+      setLocked(false);
+      const next = scenarioIdx + 1;
+      if (next >= UNEXPECTED_SCENARIOS.length) {
+        finishLevel();
+      } else {
+        setScenarioIdx(next);
+        scenarioStartRef.current = now();
+      }
+    }, 800);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [locked, scenarioIdx]);
 
   const currentScenario = UNEXPECTED_SCENARIOS[scenarioIdx];
 

@@ -123,6 +123,7 @@ export default function DashboardLayout({ children }) {
         }
       })
       .catch(() => router.replace('/dashboard/login'));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleSignOut() {

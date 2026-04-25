@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect , useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
@@ -14,6 +14,7 @@ const TOTAL_ROUNDS = 4;
 const SLOW_TRANS_MS = 8000;  // >8s between guide message → Next Book = slow transition
 
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+function now() { return Date.now(); }
 
 export default function Level4Page() {
   const router      = useRouter();
@@ -28,6 +29,7 @@ export default function Level4Page() {
   const [selectedTopic, setSelectedTopic] = useState(null);
   const [factIdx, setFactIdx]       = useState(0);
   const [feedback, setFeedback]     = useState({ show: false, correct: true });
+  const [visitCounts, setVisitCounts] = useState({});
 
   const guideShownAtRef    = useRef(null);
   const topicHistoryRef    = useRef([]);       // ordered list of topic IDs selected
@@ -39,9 +41,12 @@ export default function Level4Page() {
   const sessionIdRef       = useRef(sessionId);
   const playRef            = useRef(play);
 
-  sessionIdRef.current = sessionId;
-  playRef.current      = play;
+  useLayoutEffect(() => {
+    sessionIdRef.current = sessionId;
+    playRef.current      = play;
+  });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(4, 4); }, []);
 
   function handleTopicSelect(topic) {
@@ -51,6 +56,7 @@ export default function Level4Page() {
     topicHistoryRef.current.push(topic.id);
     topicVisitCounts.current[topic.id] = (topicVisitCounts.current[topic.id] ?? 0) + 1;
     slideCountsRef.current[topic.id]   = slideCountsRef.current[topic.id] ?? 0;
+    setVisitCounts({ ...topicVisitCounts.current });
 
     setSelectedTopic(topic);
     setFactIdx(0);
@@ -68,18 +74,18 @@ export default function Level4Page() {
       setFactIdx(next);
     } else {
       // All 5 facts read — show guide message
-      guideShownAtRef.current = Date.now();
+      guideShownAtRef.current = now();
       setPhase('guide');
     }
   }
 
   function handleNextBook() {
-    const elapsed = guideShownAtRef.current ? Date.now() - guideShownAtRef.current : 0;
+    const elapsed = guideShownAtRef.current ? now() - guideShownAtRef.current : 0;
     transitionTimesRef.current.push(elapsed);
 
     responsesRef.current.push({
       taskKey:       `ch4_l4_topic_${roundIdx + 1}`,
-      startedAt:     Date.now(),
+      startedAt:     now(),
       responseTimeMs: elapsed,
       isCorrect:     true,
       attemptNumber: 1,
@@ -208,9 +214,9 @@ export default function Level4Page() {
                     <p className="text-xs text-white/90 font-medium mt-1 text-center leading-tight">
                       {topic.label}
                     </p>
-                    {topicVisitCounts.current[topic.id] > 0 && (
+                    {visitCounts[topic.id] > 0 && (
                       <span className="text-xs text-yellow-300 font-bold mt-0.5">
-                        ×{topicVisitCounts.current[topic.id]}
+                        ×{visitCounts[topic.id]}
                       </span>
                     )}
                   </motion.button>

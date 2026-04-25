@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect , useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
@@ -10,6 +10,7 @@ import FeedbackBurst from '@/components/game/FeedbackBurst.jsx';
 import { DISCOVERY_EVENTS } from '@/lib/gameData/chapter3.js';
 
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+function now() { return Date.now(); }
 
 // Each event has two sub-phases: friend_finds (attend) then child_finds (share).
 // Phase A: friend points at their emoji → child must tap it
@@ -33,22 +34,26 @@ export default function Level3Page() {
   const responsesRef   = useRef([]);
   const sessionIdRef   = useRef(sessionId);
   const playRef        = useRef(play);
-  sessionIdRef.current = sessionId;
-  playRef.current      = play;
+  useLayoutEffect(() => {
+    sessionIdRef.current = sessionId;
+    playRef.current      = play;
+  });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(3, 3); }, []);
 
-  // Start attend timeout when entering attend phase
-  useEffect(() => {
-    if (phase !== 'attend' || complete) return;
-    if (attendTimerRef.current) clearTimeout(attendTimerRef.current);
-    attendTimerRef.current = setTimeout(() => {
-      handleAttendTimeout();
-    }, 5000);
-    return () => clearTimeout(attendTimerRef.current);
-  }, [eventIdx, phase, complete]);
-
   const event = DISCOVERY_EVENTS[eventIdx];
+
+  function recordAttend(isCorrect, pts) {
+    responsesRef.current.push({
+      taskKey: event.attendKey,
+      startedAt: now(),
+      isCorrect,
+      attemptNumber: 1,
+      scorePoints: pts,
+      selection: { action: isCorrect ? 'tapped_target' : 'missed' },
+    });
+  }
 
   function handleAttendTimeout() {
     if (tapped) return;
@@ -63,6 +68,17 @@ export default function Level3Page() {
     }, 700);
   }
 
+  // Start attend timeout when entering attend phase
+  useEffect(() => {
+    if (phase !== 'attend' || complete) return;
+    if (attendTimerRef.current) clearTimeout(attendTimerRef.current);
+    attendTimerRef.current = setTimeout(() => {
+      handleAttendTimeout();
+    }, 5000);
+    return () => clearTimeout(attendTimerRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [eventIdx, phase, complete]);
+
   async function handleAttendTap() {
     if (tapped || phase !== 'attend') return;
     clearTimeout(attendTimerRef.current);
@@ -76,17 +92,6 @@ export default function Level3Page() {
     setTapped(false);
   }
 
-  function recordAttend(isCorrect, pts) {
-    responsesRef.current.push({
-      taskKey: event.attendKey,
-      startedAt: Date.now(),
-      isCorrect,
-      attemptNumber: 1,
-      scorePoints: pts,
-      selection: { action: isCorrect ? 'tapped_target' : 'missed' },
-    });
-  }
-
   async function handleShareChoice(choice) {
     if (tapped || phase !== 'share') return;
     setTapped(true);
@@ -94,7 +99,7 @@ export default function Level3Page() {
     const pts = isShare ? 0 : 2;
     responsesRef.current.push({
       taskKey: event.shareKey,
-      startedAt: Date.now(),
+      startedAt: now(),
       isCorrect: isShare,
       attemptNumber: 1,
       scorePoints: pts,

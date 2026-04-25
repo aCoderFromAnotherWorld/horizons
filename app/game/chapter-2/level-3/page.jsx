@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
@@ -18,6 +18,7 @@ function scoreRegulation(type, slow) {
 }
 
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+function now() { return Date.now(); }
 
 const OPTION_COLORS = {
   appropriate: { bg: 'rgba(16,185,129,0.25)', border: 'rgba(16,185,129,0.6)', hover: 'rgba(16,185,129,0.4)' },
@@ -41,13 +42,21 @@ export default function Level3Page() {
   const responsesRef   = useRef([]);
   const sessionIdRef   = useRef(sessionId);
   const playRef        = useRef(play);
-  const startedAtRef   = useRef(Date.now());
+  const startedAtRef   = useRef(null);
   const timeoutRef     = useRef(null);
 
-  sessionIdRef.current = sessionId;
-  playRef.current      = play;
+  useLayoutEffect(() => {
+    sessionIdRef.current = sessionId;
+    playRef.current      = play;
+  });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(2, 3); }, []);
+
+  function handleTimeout() {
+    if (tapped) return;
+    handleSelection({ label: 'No response', type: 'avoidant' }, true);
+  }
 
   // Start the 15-second response timer when scenario changes
   useEffect(() => {
@@ -58,13 +67,8 @@ export default function Level3Page() {
       handleTimeout();
     }, RESPONSE_TIMEOUT_MS);
     return () => clearTimeout(timeoutRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scenarioIdx, showPractice, complete]);
-
-  function handleTimeout() {
-    if (tapped) return;
-    // Treat as avoidant (no response) + slow penalty
-    handleSelection({ label: 'No response', type: 'avoidant' }, true);
-  }
 
   async function handleSelection(option, isSlow = false) {
     clearTimeout(timeoutRef.current);
@@ -72,7 +76,7 @@ export default function Level3Page() {
     setTapped(true);
 
     const scenario = REGULATION_SCENARIOS[scenarioIdx];
-    const elapsed  = Date.now() - startedAtRef.current;
+    const elapsed  = now() - startedAtRef.current;
     const slow     = isSlow || elapsed > RESPONSE_TIMEOUT_MS;
     const pts      = scoreRegulation(option.type, slow);
     const isCorrect = option.type === 'appropriate';

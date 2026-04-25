@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback , useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
@@ -68,6 +68,7 @@ function SortableCard({ card, disabled }) {
 }
 
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+function now() { return Date.now(); }
 
 export default function Level1Page() {
   const router      = useRouter();
@@ -90,9 +91,12 @@ export default function Level1Page() {
   const responsesRef        = useRef([]);
   const totalScoreRef       = useRef(0);
 
-  sessionIdRef.current = sessionId;
-  playRef.current      = play;
+  useLayoutEffect(() => {
+    sessionIdRef.current = sessionId;
+    playRef.current      = play;
+  });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(4, 1); }, []);
 
   // Cleanup disruption timer on unmount
@@ -124,7 +128,7 @@ export default function Level1Page() {
       setSortErrors(prev => prev);
       responsesRef.current.push({
         taskKey:       'ch4_l1_sort',
-        startedAt:     Date.now(),
+        startedAt:     now(),
         isCorrect:     true,
         attemptNumber: attempt,
         scorePoints:   sortErrors,
@@ -142,7 +146,7 @@ export default function Level1Page() {
       const pts = sortErrors + errors + 3; // 3 pts for unable to complete
       responsesRef.current.push({
         taskKey:       'ch4_l1_sort',
-        startedAt:     Date.now(),
+        startedAt:     now(),
         isCorrect:     false,
         attemptNumber: attempt,
         scorePoints:   pts,
@@ -164,7 +168,7 @@ export default function Level1Page() {
 
   function enterDisruption() {
     setPhase('disruption');
-    disruptionStartRef.current = Date.now();
+    disruptionStartRef.current = now();
     disruptionTimerRef.current = setTimeout(() => {
       if (!disruptionAnswered) {
         handleDisruptionAnswer(null); // timeout — add +1 pt
@@ -172,12 +176,40 @@ export default function Level1Page() {
     }, DISRUPTION_TIMEOUT_MS);
   }
 
+  async function finishLevel() {
+    setPhase('complete');
+    playRef.current('cueChapterComplete');
+
+    const sid = sessionIdRef.current;
+    if (sid) {
+      await Promise.allSettled([
+        ...responsesRef.current.map(r =>
+          fetch('/api/game/response', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ sessionId: sid, chapter: 4, level: 1, ...r }),
+          })
+        ),
+        fetch('/api/game/score', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ sessionId: sid, chapterKey: CHAPTER_KEY, rawPoints: totalScoreRef.current }),
+        }),
+      ]);
+      addScore(CHAPTER_KEY, totalScoreRef.current);
+    }
+
+    await delayMs(1800);
+    goToChapter(4, 2);
+    router.push('/game/chapter-4/level-2');
+  }
+
   const handleDisruptionAnswer = useCallback((optionType) => {
     clearTimeout(disruptionTimerRef.current);
     if (disruptionAnswered) return;
     setDisruptionAnswered(true);
 
-    const elapsedMs = disruptionStartRef.current ? Date.now() - disruptionStartRef.current : 0;
+    const elapsedMs = disruptionStartRef.current ? now() - disruptionStartRef.current : 0;
     const tooSlow   = elapsedMs > DISRUPTION_TIMEOUT_MS;
 
     let pts = 0;
@@ -207,35 +239,8 @@ export default function Level1Page() {
       setFeedback({ show: false, correct: true });
       finishLevel();
     }, 900);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [disruptionAnswered]);
-
-  async function finishLevel() {
-    setPhase('complete');
-    playRef.current('cueChapterComplete');
-
-    const sid = sessionIdRef.current;
-    if (sid) {
-      await Promise.allSettled([
-        ...responsesRef.current.map(r =>
-          fetch('/api/game/response', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ sessionId: sid, chapter: 4, level: 1, ...r }),
-          })
-        ),
-        fetch('/api/game/score', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ sessionId: sid, chapterKey: CHAPTER_KEY, rawPoints: totalScoreRef.current }),
-        }),
-      ]);
-      addScore(CHAPTER_KEY, totalScoreRef.current);
-    }
-
-    await delayMs(1800);
-    goToChapter(4, 2);
-    router.push('/game/chapter-4/level-2');
-  }
 
   const cards = cardOrder.map(id => ROUTINE_CARDS.find(c => c.id === id));
 

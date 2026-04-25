@@ -25,18 +25,19 @@ import { CSS } from '@dnd-kit/utilities';
 const TIMEOUT_MS = 10000;
 
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+function now() { return Date.now(); }
 
 // ── tap_target ────────────────────────────────────────────────────────────────
 
 function TapTarget({ task, onComplete }) {
   const timerRef = useRef(null);
-  const startRef = useRef(Date.now());
+  const startRef = useRef(null);
   const [tapped, setTapped] = useState(false);
   const timeoutRef = useRef(null);
 
   useEffect(() => {
     timerRef.current?.start();
-    startRef.current = Date.now();
+    startRef.current = now();
     timeoutRef.current = setTimeout(() => {
       if (!tapped) {
         setTapped(true);
@@ -44,13 +45,14 @@ function TapTarget({ task, onComplete }) {
       }
     }, TIMEOUT_MS);
     return () => clearTimeout(timeoutRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleTap() {
     if (tapped) return;
     clearTimeout(timeoutRef.current);
     setTapped(true);
-    const elapsed = Date.now() - startRef.current;
+    const elapsed = now() - startRef.current;
     const pts = elapsed < 2000 ? 0 : elapsed < 5000 ? 1 : 2;
     await delayMs(300);
     onComplete(pts, pts === 0, elapsed);
@@ -76,12 +78,12 @@ function TapTarget({ task, onComplete }) {
 // ── grid_select ───────────────────────────────────────────────────────────────
 
 function GridSelect({ task, onComplete }) {
-  const startRef = useRef(Date.now());
+  const startRef = useRef(null);
   const timeoutRef = useRef(null);
   const [tapped, setTapped] = useState(false);
 
   useEffect(() => {
-    startRef.current = Date.now();
+    startRef.current = now();
     timeoutRef.current = setTimeout(() => {
       if (!tapped) {
         setTapped(true);
@@ -89,13 +91,14 @@ function GridSelect({ task, onComplete }) {
       }
     }, TIMEOUT_MS);
     return () => clearTimeout(timeoutRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleTap(opt) {
     if (tapped) return;
     clearTimeout(timeoutRef.current);
     setTapped(true);
-    const elapsed = Date.now() - startRef.current;
+    const elapsed = now() - startRef.current;
     await delayMs(300);
     onComplete(opt.correct ? 0 : opt.scorePoints, opt.correct, elapsed);
   }
@@ -135,12 +138,12 @@ function GridSelect({ task, onComplete }) {
 // ── scenario_choice ───────────────────────────────────────────────────────────
 
 function ScenarioChoice({ task, onComplete }) {
-  const startRef = useRef(Date.now());
+  const startRef = useRef(null);
   const timeoutRef = useRef(null);
   const [tapped, setTapped] = useState(false);
 
   useEffect(() => {
-    startRef.current = Date.now();
+    startRef.current = now();
     timeoutRef.current = setTimeout(() => {
       if (!tapped) {
         setTapped(true);
@@ -148,13 +151,14 @@ function ScenarioChoice({ task, onComplete }) {
       }
     }, TIMEOUT_MS);
     return () => clearTimeout(timeoutRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   async function handleTap(opt) {
     if (tapped) return;
     clearTimeout(timeoutRef.current);
     setTapped(true);
-    const elapsed = Date.now() - startRef.current;
+    const elapsed = now() - startRef.current;
     await delayMs(300);
     onComplete(opt.scorePoints, opt.scorePoints === 0, elapsed);
   }
@@ -211,7 +215,7 @@ function DragSort({ task, onComplete }) {
   const [items, setItems] = useState(() => task.options.map(o => ({ ...o })));
   const [activeId, setActiveId] = useState(null);
   const [submitted, setSubmitted] = useState(false);
-  const startRef = useRef(Date.now());
+  const startRef = useRef(null);
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -220,10 +224,14 @@ function DragSort({ task, onComplete }) {
 
   const activeItem = items.find(i => i.id === activeId);
 
+  useEffect(() => {
+    startRef.current = now();
+  }, []);
+
   async function handleSubmit() {
     if (submitted) return;
     setSubmitted(true);
-    const elapsed = Date.now() - startRef.current;
+    const elapsed = now() - startRef.current;
     const currentOrder = items.map(i => i.id);
     let errors = 0;
     for (let i = 0; i < correctOrder.length; i++) {

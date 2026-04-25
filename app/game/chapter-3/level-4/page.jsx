@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect , useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
@@ -22,6 +22,7 @@ function scoreImitation(isCorrect, modality, timedOut) {
 }
 
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+function now() { return Date.now(); }
 
 export default function Level4Page() {
   const router      = useRouter();
@@ -43,26 +44,13 @@ export default function Level4Page() {
   const responsesRef   = useRef([]);
   const sessionIdRef   = useRef(sessionId);
   const playRef        = useRef(play);
-  sessionIdRef.current = sessionId;
-  playRef.current      = play;
+  useLayoutEffect(() => {
+    sessionIdRef.current = sessionId;
+    playRef.current      = play;
+  });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(3, 4); }, []);
-
-  // Start action animation, then show options after clip finishes
-  useEffect(() => {
-    if (showPractice || complete) return;
-    setAnimating(true);
-    setTapped(false);
-    // Animation duration ~2s then reveal options + start timeout
-    const animEnd = setTimeout(() => {
-      setAnimating(false);
-      startTimeout();
-    }, 2200);
-    return () => {
-      clearTimeout(animEnd);
-      clearTimeout(timeoutRef.current);
-    };
-  }, [trialIdx, trialKey, showPractice, complete]);
 
   function startTimeout() {
     clearTimeout(timeoutRef.current);
@@ -84,11 +72,28 @@ export default function Level4Page() {
     }, 800);
   }
 
+  // Start action animation, then show options after clip finishes
+  useEffect(() => {
+    if (showPractice || complete) return;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setAnimating(true);
+    setTapped(false);
+    const animEnd = setTimeout(() => {
+      setAnimating(false);
+      startTimeout();
+    }, 2200);
+    return () => {
+      clearTimeout(animEnd);
+      clearTimeout(timeoutRef.current);
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [trialIdx, trialKey, showPractice, complete]);
+
   function recordResponse(action, isCorrect, timedOut) {
     const pts = scoreImitation(isCorrect, action.modality, timedOut);
     responsesRef.current.push({
       taskKey:     action.taskKey,
-      startedAt:   Date.now(),
+      startedAt:   now(),
       isCorrect,
       attemptNumber: 1,
       scorePoints: pts,

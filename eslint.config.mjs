@@ -10,6 +10,8 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Internal tooling not subject to project lint rules
+    ".claude/**",
   ]),
 ]);
 

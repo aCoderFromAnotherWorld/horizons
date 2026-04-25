@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
@@ -44,9 +44,11 @@ export default function Level1Page() {
   const playRef        = useRef(play);
   const sessionIdRef   = useRef(sessionId);
 
-  // Keep refs current each render (avoids stale closures in async sequence)
-  playRef.current      = play;
-  sessionIdRef.current = sessionId;
+  // Keep refs current after each render (avoids stale closures in async sequence)
+  useLayoutEffect(() => {
+    playRef.current      = play;
+    sessionIdRef.current = sessionId;
+  });
 
   function waitForTapOrTimeout(timeoutMs) {
     return new Promise(resolve => {
@@ -164,6 +166,7 @@ export default function Level1Page() {
     }
 
     runSequence();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const trialNum = trialIdx + 1;

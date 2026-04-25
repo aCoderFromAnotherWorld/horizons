@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
 import { useSoundCue } from '@/hooks/useSoundCue.js';
@@ -66,6 +66,7 @@ const RED_FLAG_DESCRIPTIONS = {
 };
 
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+function now() { return Date.now(); }
 
 export default function Chapter6Page() {
   const sessionId       = useGameStore(s => s.sessionId);
@@ -86,8 +87,10 @@ export default function Chapter6Page() {
 
   const responsesRef  = useRef([]);
   const sessionIdRef  = useRef(sessionId);
-  sessionIdRef.current = sessionId;
 
+  useLayoutEffect(() => { sessionIdRef.current = sessionId; });
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(6, 1); }, []);
 
   // Fetch task pool on mount
@@ -110,36 +113,6 @@ export default function Chapter6Page() {
     const t = setTimeout(() => setPhase('playing'), 3000);
     return () => clearTimeout(t);
   }, [phase]);
-
-  const handleTaskComplete = useCallback(async (scorePoints, isCorrect, responseTimeMs) => {
-    const task = tasks[taskIndex];
-    if (!task) return;
-
-    responsesRef.current.push({
-      taskKey:       task.key,
-      chapter:       6,
-      level:         1,
-      startedAt:     Date.now() - (responseTimeMs ?? 0),
-      responseTimeMs: responseTimeMs ?? 0,
-      selection:     { mechanic: task.mechanic },
-      isCorrect,
-      attemptNumber: 1,
-      scorePoints,
-    });
-
-    setFeedback({ show: true, correct: isCorrect });
-    play(isCorrect ? 'cueCorrect' : 'cueWrong');
-
-    await delayMs(800);
-    setFeedback({ show: false, correct: true });
-
-    const next = taskIndex + 1;
-    if (next < tasks.length) {
-      setTaskIndex(next);
-    } else {
-      await finishChapter();
-    }
-  }, [taskIndex, tasks, play]);
 
   async function finishChapter() {
     setPhase('submitting');
@@ -186,6 +159,37 @@ export default function Chapter6Page() {
     setShowConfetti(true);
     setPhase('results');
   }
+
+  const handleTaskComplete = useCallback(async (scorePoints, isCorrect, responseTimeMs) => {
+    const task = tasks[taskIndex];
+    if (!task) return;
+
+    responsesRef.current.push({
+      taskKey:       task.key,
+      chapter:       6,
+      level:         1,
+      startedAt:     now() - (responseTimeMs ?? 0),
+      responseTimeMs: responseTimeMs ?? 0,
+      selection:     { mechanic: task.mechanic },
+      isCorrect,
+      attemptNumber: 1,
+      scorePoints,
+    });
+
+    setFeedback({ show: true, correct: isCorrect });
+    play(isCorrect ? 'cueCorrect' : 'cueWrong');
+
+    await delayMs(800);
+    setFeedback({ show: false, correct: true });
+
+    const next = taskIndex + 1;
+    if (next < tasks.length) {
+      setTaskIndex(next);
+    } else {
+      await finishChapter();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [taskIndex, tasks, play]);
 
   const scheduleItems = tasks.map(t => ({
     emoji: typeof t.emoji === 'string' ? t.emoji[0] : '⭐',

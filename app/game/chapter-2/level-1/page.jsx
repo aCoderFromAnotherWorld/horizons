@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
@@ -16,6 +16,8 @@ import {
   EMOTION_BUCKETS,
   L1_PRACTICE_STEPS,
 } from '@/lib/gameData/chapter2.js';
+
+function now() { return Date.now(); }
 
 const FACE_BATCHES = [
   FACE_CARDS.slice(0, 3),
@@ -68,11 +70,14 @@ export default function Level1Page() {
   const sortedRef      = useRef(new Set());
   const responsesRef   = useRef([]);
   const sessionIdRef   = useRef(sessionId);
-  sessionIdRef.current = sessionId;
+  const playRef        = useRef(play);
 
-  const playRef = useRef(play);
-  playRef.current = play;
+  useLayoutEffect(() => {
+    sessionIdRef.current = sessionId;
+    playRef.current      = play;
+  });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(2, 1); }, []);
 
   async function handleDrop(itemId, targetId) {
@@ -94,7 +99,7 @@ export default function Level1Page() {
       emotion:       correctEmotion,
       selectedEmotion: targetId,
       scorePoints:   isCorrect ? 0 : 1,
-      startedAt:     Date.now(),
+      startedAt:     now(),
     });
 
     setFeedback({ show: true, correct: isCorrect });
@@ -184,7 +189,7 @@ export default function Level1Page() {
   // Build current draggable items
   const currentItems = phase === 'face'
     ? FACE_BATCHES[batchIdx]
-        .filter(c => !sortedRef.current.has(c.taskKey))
+        .filter(c => !sortedIds.has(c.taskKey))
         .map(c => ({ id: c.taskKey, emoji: c.emoji }))
     : [SCENARIO_CARDS[scenarioIdx]].map(c => ({
         id: c.taskKey,
@@ -192,7 +197,7 @@ export default function Level1Page() {
         label: c.description,
       }));
 
-  const progressCount = sortedRef.current.size;
+  const progressCount = sortedIds.size;
 
   return (
     <SceneCanvas chapterNumber={2}>

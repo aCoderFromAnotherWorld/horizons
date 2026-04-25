@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
@@ -40,6 +40,7 @@ export default function Level2Page() {
   const [activeTarget, setActiveTarget]   = useState(null); // null | targetIdx
   const [feedback, setFeedback]           = useState({ show: false, correct: true });
   const [complete, setComplete]           = useState(false);
+  const [doneTaskKeys, setDoneTaskKeys]   = useState(new Set());
 
   const tapResolverRef = useRef(null);
   const responsesRef   = useRef([]);
@@ -47,8 +48,10 @@ export default function Level2Page() {
   const playRef        = useRef(play);
   const sessionIdRef   = useRef(sessionId);
 
-  playRef.current      = play;
-  sessionIdRef.current = sessionId;
+  useLayoutEffect(() => {
+    playRef.current      = play;
+    sessionIdRef.current = sessionId;
+  });
 
   // Resolves with { type: 'correct' | 'guide' | 'wrong' | 'timeout' }
   function waitForAnyTap(timeoutMs) {
@@ -139,6 +142,7 @@ export default function Level2Page() {
         scorePoints:    pts,
         extraData:      { result },
       });
+      setDoneTaskKeys(prev => { const s = new Set(prev); s.add(target.taskKey); return s; });
 
       // Feedback
       setActiveTarget(null);
@@ -217,7 +221,7 @@ export default function Level2Page() {
           {/* Target emoji objects */}
           {GUIDE_TARGETS.map((target, i) => {
             const isActive = activeTarget === i;
-            const isDone   = responsesRef.current.some(r => r.taskKey === target.taskKey);
+            const isDone   = doneTaskKeys.has(target.taskKey);
             const isCurrent = targetIdx === i && !isDone;
 
             return (

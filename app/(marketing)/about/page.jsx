@@ -67,7 +67,7 @@ export default function AboutPage() {
           >
             <p>
               This study validated play-based Discrete Trial Training in a serious game format for ASD screening.
-              Two metrics inform Horizons' scoring:
+              Two metrics inform Horizons&apos; scoring:
             </p>
             <ul className="list-disc list-inside mt-2 space-y-1 text-sm">
               <li><strong>Accuracy</strong> = correct_responses ÷ total_responses</li>

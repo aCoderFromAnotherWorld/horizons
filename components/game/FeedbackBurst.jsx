@@ -21,6 +21,7 @@ export default function FeedbackBurst({ show, correct, onComplete }) {
     if (!show || !onComplete) return;
     const t = setTimeout(onComplete, BURST_DURATION_MS);
     return () => clearTimeout(t);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [show]);
 
   return (

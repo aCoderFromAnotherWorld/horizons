@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect , useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
@@ -14,6 +14,7 @@ const SLOW_SCENE_MS  = 15000;  // >15s before Done → +1 pt
 const MAX_SELECTIONS = 5;
 
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+function now() { return Date.now(); }
 
 /** Serialize selected item IDs to a stable key for comparison */
 function selectionKey(ids) {
@@ -39,16 +40,20 @@ export default function Level2Page() {
   const sessionIdRef    = useRef(sessionId);
   const playRef         = useRef(play);
 
-  sessionIdRef.current = sessionId;
-  playRef.current      = play;
+  useLayoutEffect(() => {
+    sessionIdRef.current = sessionId;
+    playRef.current      = play;
+  });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(5, 2); }, []);
 
   // Reset & start timer on scene change
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSelected(new Set());
     setLocked(false);
-    sceneStartRef.current = Date.now();
+    sceneStartRef.current = now();
   }, [sceneIdx]);
 
   function toggleObject(objId) {
@@ -68,7 +73,7 @@ export default function Level2Page() {
     if (locked) return;
     setLocked(true);
 
-    const elapsed    = sceneStartRef.current ? Date.now() - sceneStartRef.current : 0;
+    const elapsed    = sceneStartRef.current ? now() - sceneStartRef.current : 0;
     const tooSlow    = elapsed > SLOW_SCENE_MS;
     const selectedIds = Array.from(selected);
     const key        = selectionKey(selectedIds);
@@ -100,7 +105,7 @@ export default function Level2Page() {
 
     responsesRef.current.push({
       taskKey:       `ch5_l2_scene_${sceneIdx + 1}`,
-      startedAt:     sceneStartRef.current ?? Date.now(),
+      startedAt:     sceneStartRef.current ?? now(),
       responseTimeMs: elapsed,
       isCorrect,
       attemptNumber: 1,

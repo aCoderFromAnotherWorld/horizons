@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef , useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
@@ -42,8 +42,10 @@ export default function Level1Page() {
   const runningRef     = useRef(false);
   const playRef        = useRef(play);
   const sessionIdRef   = useRef(sessionId);
-  playRef.current      = play;
-  sessionIdRef.current = sessionId;
+  useLayoutEffect(() => {
+    playRef.current      = play;
+    sessionIdRef.current = sessionId;
+  });
 
   function waitForTap(timeoutMs) {
     return new Promise(resolve => {
@@ -140,6 +142,7 @@ export default function Level1Page() {
     }
 
     runSequence();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const currentStep = GREETING_STEPS[stepIdx];

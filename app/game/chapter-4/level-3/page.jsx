@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useRef, useEffect, useCallback } from 'react';
+import { useState, useRef, useEffect, useCallback , useLayoutEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useGameStore } from '@/store/gameStore.js';
@@ -17,6 +17,7 @@ const FORCED_ERR_MS   = 1500;  // duration of "forced error" display phase
 const INSIST_TAPS     = 2;     // taps during forced-error phase → distress flag
 
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
+function now() { return Date.now(); }
 
 export default function Level3Page() {
   const router      = useRouter();
@@ -48,136 +49,14 @@ export default function Level3Page() {
   const playRef         = useRef(play);
   const phaseRef        = useRef(phase);
 
-  sessionIdRef.current = sessionId;
-  playRef.current      = play;
-  phaseRef.current     = phase;
+  useLayoutEffect(() => {
+    sessionIdRef.current = sessionId;
+    playRef.current      = play;
+    phaseRef.current     = phase;
+  });
 
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(4, 3); }, []);
-
-  // Start timer when a new play phase begins
-  useEffect(() => {
-    if (showPractice || complete || phase !== 'play') return;
-    startedAtRef.current = Date.now();
-    insistTapsRef.current = 0;
-    wrongTapsRef.current  = 0;
-    setWrongTaps(0);
-    setInsistTaps(0);
-    setTapped(false);
-
-    clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      if (phaseRef.current === 'play') {
-        handleTimeout();
-      }
-    }, TIMEOUT_MS);
-
-    return () => clearTimeout(timeoutRef.current);
-  }, [patternIdx, patternKey, showPractice, complete]);
-
-  function handleTimeout() {
-    if (tapped) return;
-    setTapped(true);
-    clearTimeout(timeoutRef.current);
-
-    const pattern = PATTERNS[patternIdx];
-    const pts = wrongTapsRef.current + 2; // +2 for timeout
-    totalScoreRef.current += pts;
-    responsesRef.current.push({
-      taskKey:       pattern.taskKey,
-      startedAt:     startedAtRef.current,
-      responseTimeMs: TIMEOUT_MS,
-      isCorrect:     false,
-      attemptNumber: 1 + wrongTapsRef.current,
-      scorePoints:   pts,
-      selection:     { timedOut: true, wrongTaps: wrongTapsRef.current },
-    });
-
-    setFeedback({ show: true, correct: false });
-    playRef.current('cueWrong');
-    setTimeout(() => {
-      setFeedback({ show: false, correct: true });
-      startForcedError();
-    }, 700);
-  }
-
-  function startForcedError() {
-    setPhase('forced_error');
-    phaseRef.current = 'forced_error';
-    insistTapsRef.current = 0;
-    setInsistTaps(0);
-
-    forcedErrRef.current = setTimeout(() => {
-      endForcedError();
-    }, FORCED_ERR_MS);
-  }
-
-  function endForcedError() {
-    clearTimeout(forcedErrRef.current);
-    if (insistTapsRef.current >= INSIST_TAPS) {
-      distressFlagRef.current = true;
-    }
-    advancePattern();
-  }
-
-  function handleOptionTap(optIdx) {
-    if (complete) return;
-
-    if (phaseRef.current === 'forced_error') {
-      // Tapping during forced-error phase = insistence
-      insistTapsRef.current += 1;
-      setInsistTaps(t => t + 1);
-      return;
-    }
-
-    if (phaseRef.current !== 'play' || tapped) return;
-
-    const pattern = PATTERNS[patternIdx];
-    const isCorrect = optIdx === pattern.correctIdx;
-
-    if (isCorrect) {
-      clearTimeout(timeoutRef.current);
-      setTapped(true);
-
-      const elapsed = startedAtRef.current ? Date.now() - startedAtRef.current : 0;
-      const pts     = wrongTapsRef.current; // each wrong tap = +1 pt
-      totalScoreRef.current += pts;
-      responsesRef.current.push({
-        taskKey:       pattern.taskKey,
-        startedAt:     startedAtRef.current,
-        responseTimeMs: elapsed,
-        isCorrect:     true,
-        attemptNumber: 1 + wrongTapsRef.current,
-        scorePoints:   pts,
-        selection:     { optIdx, wrongTaps: wrongTapsRef.current },
-      });
-
-      setFeedback({ show: true, correct: true });
-      playRef.current('cueCorrect');
-      setTimeout(() => {
-        setFeedback({ show: false, correct: true });
-        startForcedError();
-      }, 700);
-    } else {
-      // Wrong tap
-      wrongTapsRef.current += 1;
-      setWrongTaps(t => t + 1);
-      setFeedback({ show: true, correct: false });
-      playRef.current('cueWrong');
-      setTimeout(() => setFeedback({ show: false, correct: true }), 500);
-    }
-  }
-
-  function advancePattern() {
-    const next = patternIdx + 1;
-    setPhase('play');
-    phaseRef.current = 'play';
-    if (next < PATTERNS.length) {
-      setPatternIdx(next);
-      setPatternKey(k => k + 1);
-    } else {
-      finishLevel();
-    }
-  }
 
   async function finishLevel() {
     const redFlagTriggered = distressFlagRef.current;
@@ -223,6 +102,133 @@ export default function Level3Page() {
     await delayMs(1800);
     goToChapter(4, 4);
     router.push('/game/chapter-4/level-4');
+  }
+
+  function advancePattern() {
+    const next = patternIdx + 1;
+    setPhase('play');
+    phaseRef.current = 'play';
+    if (next < PATTERNS.length) {
+      setPatternIdx(next);
+      setPatternKey(k => k + 1);
+    } else {
+      finishLevel();
+    }
+  }
+
+  function endForcedError() {
+    clearTimeout(forcedErrRef.current);
+    if (insistTapsRef.current >= INSIST_TAPS) {
+      distressFlagRef.current = true;
+    }
+    advancePattern();
+  }
+
+  function startForcedError() {
+    setPhase('forced_error');
+    phaseRef.current = 'forced_error';
+    insistTapsRef.current = 0;
+    setInsistTaps(0);
+
+    forcedErrRef.current = setTimeout(() => {
+      endForcedError();
+    }, FORCED_ERR_MS);
+  }
+
+  function handleTimeout() {
+    if (tapped) return;
+    setTapped(true);
+    clearTimeout(timeoutRef.current);
+
+    const pattern = PATTERNS[patternIdx];
+    const pts = wrongTapsRef.current + 2; // +2 for timeout
+    totalScoreRef.current += pts;
+    responsesRef.current.push({
+      taskKey:       pattern.taskKey,
+      startedAt:     startedAtRef.current,
+      responseTimeMs: TIMEOUT_MS,
+      isCorrect:     false,
+      attemptNumber: 1 + wrongTapsRef.current,
+      scorePoints:   pts,
+      selection:     { timedOut: true, wrongTaps: wrongTapsRef.current },
+    });
+
+    setFeedback({ show: true, correct: false });
+    playRef.current('cueWrong');
+    setTimeout(() => {
+      setFeedback({ show: false, correct: true });
+      startForcedError();
+    }, 700);
+  }
+
+  // Start timer when a new play phase begins
+  useEffect(() => {
+    if (showPractice || complete || phase !== 'play') return;
+    startedAtRef.current = now();
+    insistTapsRef.current = 0;
+    wrongTapsRef.current  = 0;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setWrongTaps(0);
+    setInsistTaps(0);
+    setTapped(false);
+
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      if (phaseRef.current === 'play') {
+        handleTimeout();
+      }
+    }, TIMEOUT_MS);
+
+    return () => clearTimeout(timeoutRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patternIdx, patternKey, showPractice, complete]);
+
+  function handleOptionTap(optIdx) {
+    if (complete) return;
+
+    if (phaseRef.current === 'forced_error') {
+      // Tapping during forced-error phase = insistence
+      insistTapsRef.current += 1;
+      setInsistTaps(t => t + 1);
+      return;
+    }
+
+    if (phaseRef.current !== 'play' || tapped) return;
+
+    const pattern = PATTERNS[patternIdx];
+    const isCorrect = optIdx === pattern.correctIdx;
+
+    if (isCorrect) {
+      clearTimeout(timeoutRef.current);
+      setTapped(true);
+
+      const elapsed = startedAtRef.current ? now() - startedAtRef.current : 0;
+      const pts     = wrongTapsRef.current; // each wrong tap = +1 pt
+      totalScoreRef.current += pts;
+      responsesRef.current.push({
+        taskKey:       pattern.taskKey,
+        startedAt:     startedAtRef.current,
+        responseTimeMs: elapsed,
+        isCorrect:     true,
+        attemptNumber: 1 + wrongTapsRef.current,
+        scorePoints:   pts,
+        selection:     { optIdx, wrongTaps: wrongTapsRef.current },
+      });
+
+      setFeedback({ show: true, correct: true });
+      playRef.current('cueCorrect');
+      setTimeout(() => {
+        setFeedback({ show: false, correct: true });
+        startForcedError();
+      }, 700);
+    } else {
+      // Wrong tap
+      wrongTapsRef.current += 1;
+      setWrongTaps(t => t + 1);
+      setFeedback({ show: true, correct: false });
+      playRef.current('cueWrong');
+      setTimeout(() => setFeedback({ show: false, correct: true }), 500);
+    }
   }
 
   const pattern = PATTERNS[patternIdx];
