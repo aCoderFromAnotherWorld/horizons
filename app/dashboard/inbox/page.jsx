@@ -105,7 +105,7 @@ export default function InboxPage() {
     fetch('/api/auth/get-session', { credentials: 'include' })
       .then(r => r.json())
       .then(session => {
-        const role = session?.session?.user?.role;
+        const role = session?.user?.role;
         if (role !== 'admin') { setIsAdmin(false); setLoading(false); return; }
         setIsAdmin(true);
         return fetch('/api/dashboard/contact', { credentials: 'include' })

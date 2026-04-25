@@ -5,14 +5,14 @@ import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 
 const EMOJI_ITEMS = [
-  { emoji: '🧒', x: '8%',  y: '12%', delay: 0.10, size: 68 },
-  { emoji: '🎮', x: '82%', y: '8%',  delay: 0.20, size: 54 },
-  { emoji: '🧩', x: '86%', y: '62%', delay: 0.30, size: 58 },
-  { emoji: '🎨', x: '4%',  y: '68%', delay: 0.25, size: 50 },
-  { emoji: '🌈', x: '44%', y: '82%', delay: 0.40, size: 54 },
-  { emoji: '⭐', x: '28%', y: '6%',  delay: 0.15, size: 38 },
-  { emoji: '🌟', x: '68%', y: '78%', delay: 0.45, size: 36 },
-  { emoji: '🎯', x: '72%', y: '28%', delay: 0.35, size: 40 },
+  { emoji: '🧒', x: '7%',  y: '14%', delay: 0.10, size: 64 },
+  { emoji: '🎮', x: '80%', y: '9%',  delay: 0.20, size: 52 },
+  { emoji: '🧩', x: '84%', y: '60%', delay: 0.30, size: 56 },
+  { emoji: '🎨', x: '4%',  y: '66%', delay: 0.25, size: 48 },
+  { emoji: '🌈', x: '43%', y: '80%', delay: 0.40, size: 52 },
+  { emoji: '⭐', x: '27%', y: '7%',  delay: 0.15, size: 36 },
+  { emoji: '🌟', x: '66%', y: '76%', delay: 0.45, size: 34 },
+  { emoji: '🎯', x: '70%', y: '26%', delay: 0.35, size: 38 },
 ];
 
 export default function Hero() {
@@ -25,26 +25,35 @@ export default function Hero() {
       className="relative min-h-dvh flex flex-col items-center justify-center overflow-hidden px-4 py-20"
       style={{
         background:
-          'radial-gradient(ellipse at 25% 20%, #c4b5fd 0%, #818cf8 25%, #4f46e5 55%, #312e81 80%, #1e1b4b 100%)',
+          'linear-gradient(155deg, #1a2560 0%, #243296 30%, #2f4abf 58%, #4063d0 80%, #5a7ad8 100%)',
       }}
     >
-      {/* Floating emoji collage */}
+      {/* Subtle warm glow for depth */}
+      <div
+        className="absolute inset-0 pointer-events-none"
+        style={{
+          background:
+            'radial-gradient(ellipse 75% 65% at 50% 50%, rgba(99,130,225,0.18) 0%, transparent 68%)',
+        }}
+      />
+
+      {/* Floating emoji */}
       {EMOJI_ITEMS.map(({ emoji, x, y, delay, size }) => (
         <motion.div
           key={`${emoji}-${x}`}
           initial={{ scale: 0, opacity: 0 }}
-          animate={{ scale: 1, opacity: 0.75 }}
-          transition={{ delay, type: 'spring', stiffness: 280, damping: 18 }}
+          animate={{ scale: 1, opacity: 0.65 }}
+          transition={{ delay, type: 'spring', stiffness: 260, damping: 20 }}
           className="absolute select-none pointer-events-none"
           style={{ left: x, top: y }}
         >
           <motion.span
-            animate={{ y: [0, -12, 0] }}
+            animate={{ y: [0, -10, 0] }}
             transition={{
-              duration: 3.5 + delay * 3,
+              duration: 4 + delay * 2.5,
               repeat: Infinity,
               ease: 'easeInOut',
-              delay: delay,
+              delay: delay * 1.5,
             }}
             style={{ fontSize: size, display: 'block', lineHeight: 1 }}
           >
@@ -53,50 +62,67 @@ export default function Hero() {
         </motion.div>
       ))}
 
-      {/* Frosted glass card */}
+      {/* Hero card */}
       <motion.div
-        initial={{ opacity: 0, y: 40 }}
+        initial={{ opacity: 0, y: 36 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.7, ease: 'easeOut', delay: 0.05 }}
-        className="relative z-10 text-center max-w-2xl bg-white/10 backdrop-blur-sm rounded-3xl px-8 py-12 border border-white/20 shadow-2xl"
+        transition={{ duration: 0.65, ease: 'easeOut', delay: 0.05 }}
+        className="relative z-10 text-center max-w-2xl w-full"
+        style={{
+          background: 'rgba(255,255,255,0.09)',
+          backdropFilter: 'blur(20px)',
+          WebkitBackdropFilter: 'blur(20px)',
+          border: '1px solid rgba(255,255,255,0.18)',
+          borderRadius: '1.75rem',
+          padding: '3rem 2rem',
+          boxShadow: '0 20px 60px rgba(10,20,70,0.5), 0 0 0 1px rgba(255,255,255,0.08)',
+        }}
       >
         <motion.div
           initial={{ scale: 0.8, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{ delay: 0.2, duration: 0.5 }}
+          transition={{ delay: 0.18, duration: 0.5 }}
           className="text-6xl mb-4 leading-none"
         >
           🧠
         </motion.div>
 
         <motion.h1
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 18 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.25, duration: 0.55 }}
-          className="text-6xl sm:text-7xl md:text-8xl font-extrabold text-white drop-shadow-lg tracking-tight mb-4 leading-none"
+          transition={{ delay: 0.24, duration: 0.55 }}
+          className="font-extrabold text-white tracking-tight mb-3 leading-none"
+          style={{ fontSize: 'clamp(3rem, 10vw, 5rem)' }}
         >
           Horizons
         </motion.h1>
 
         <motion.p
-          initial={{ opacity: 0, y: 16 }}
+          initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.38, duration: 0.5 }}
-          className="text-lg sm:text-xl text-white/85 font-medium max-w-lg mx-auto leading-relaxed mb-8"
+          transition={{ delay: 0.36, duration: 0.5 }}
+          className="text-base sm:text-lg font-medium max-w-md mx-auto leading-relaxed mb-8"
+          style={{ color: 'rgba(220,230,255,0.92)' }}
         >
-          Understanding your child through play — a research-based behavioral screening tool for children aged 3–10
+          Understanding your child through play — a research-based behavioral
+          screening tool for children aged 3–10
         </motion.p>
 
         <motion.div
-          initial={{ opacity: 0, y: 14 }}
+          initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.52, duration: 0.45 }}
+          transition={{ delay: 0.50, duration: 0.45 }}
           className="flex flex-col sm:flex-row gap-3 justify-center"
         >
           <Button
             asChild
             size="lg"
-            className="rounded-2xl bg-white text-indigo-900 hover:bg-white/90 font-bold text-base px-7 py-5 shadow-xl min-h-[56px]"
+            className="rounded-2xl font-bold text-base px-7 min-h-[54px]"
+            style={{
+              background: '#FFFFFF',
+              color: '#1e2f8c',
+              boxShadow: '0 4px 20px rgba(0,0,0,0.22)',
+            }}
           >
             <Link href="/game/start">Start Assessment 🚀</Link>
           </Button>
@@ -104,18 +130,24 @@ export default function Hero() {
             variant="ghost"
             size="lg"
             onClick={scrollToHowItWorks}
-            className="rounded-2xl border border-white/30 text-white hover:bg-white/15 bg-white/8 font-semibold text-base px-7 py-5 min-h-[56px]"
+            className="rounded-2xl font-semibold text-base px-7 min-h-[54px]"
+            style={{
+              background: 'rgba(255,255,255,0.12)',
+              color: '#dce8ff',
+              border: '1px solid rgba(255,255,255,0.25)',
+            }}
           >
             Learn More ↓
           </Button>
         </motion.div>
 
-        {/* Quick stats */}
+        {/* Stats strip */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.7, duration: 0.5 }}
-          className="flex flex-wrap justify-center gap-6 mt-8 pt-6 border-t border-white/20"
+          transition={{ delay: 0.68, duration: 0.5 }}
+          className="flex flex-wrap justify-center gap-5 mt-8 pt-6"
+          style={{ borderTop: '1px solid rgba(255,255,255,0.18)' }}
         >
           {[
             { emoji: '📚', label: '3 research studies' },
@@ -123,7 +155,11 @@ export default function Hero() {
             { emoji: '📊', label: '4 clinical domains' },
             { emoji: '⏱️', label: '60–75 minutes' },
           ].map(({ emoji, label }) => (
-            <div key={label} className="flex items-center gap-1.5 text-white/75 text-sm font-medium">
+            <div
+              key={label}
+              className="flex items-center gap-1.5 text-sm font-semibold"
+              style={{ color: 'rgba(210,225,255,0.92)' }}
+            >
               <span>{emoji}</span>
               <span>{label}</span>
             </div>

@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import SessionsTable from '@/components/dashboard/SessionsTable.jsx';
+import ExportMenu from '@/components/dashboard/ExportMenu.jsx';
 
 export default function SessionsPage() {
   const [sessions, setSessions] = useState([]);
@@ -18,19 +19,12 @@ export default function SessionsPage() {
 
   return (
     <div className="p-6 max-w-7xl mx-auto space-y-4">
-      <div>
-        <h1 className="text-2xl font-bold text-slate-800">Sessions</h1>
-        <p className="text-sm text-slate-500 mt-0.5">All screening sessions — filter, search, and export</p>
-      </div>
-
-      <div className="flex justify-end">
-        <a
-          href="/api/dashboard/export?format=csv"
-          download
-          className="text-sm font-medium text-indigo-600 hover:text-indigo-800 hover:underline"
-        >
-          📥 Export CSV
-        </a>
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Sessions</h1>
+          <p className="text-sm text-slate-500 mt-0.5">All screening sessions — filter, search, and export</p>
+        </div>
+        <ExportMenu />
       </div>
 
       <Card className="border-slate-200">

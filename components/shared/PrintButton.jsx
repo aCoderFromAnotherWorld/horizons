@@ -1,12 +1,30 @@
 'use client';
 
-export default function PrintButton() {
+import { useState } from 'react';
+
+export default function PrintButton({ label = 'Save as PDF', className = '' }) {
+  const [printing, setPrinting] = useState(false);
+
+  function handlePrint() {
+    setPrinting(true);
+    setTimeout(() => {
+      window.print();
+      setPrinting(false);
+    }, 80);
+  }
+
   return (
     <button
-      onClick={() => window.print()}
-      className="no-print inline-flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white font-bold rounded-xl px-8 py-3 text-base transition-colors shadow-md"
+      onClick={handlePrint}
+      disabled={printing}
+      className={`no-print inline-flex items-center gap-2 font-semibold rounded-xl px-5 py-2.5 text-sm transition-all hover:opacity-90 active:scale-95 disabled:opacity-60 ${className}`}
+      style={{
+        background: '#2f4abf',
+        color: '#FFFFFF',
+        boxShadow: '0 2px 8px rgba(47,74,191,0.28)',
+      }}
     >
-      🖨️ Print Report
+      {printing ? '⏳ Preparing…' : `📄 ${label}`}
     </button>
   );
 }

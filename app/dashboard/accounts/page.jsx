@@ -13,7 +13,7 @@ export default function AccountsPage() {
     fetch('/api/auth/get-session', { credentials: 'include' })
       .then(r => r.json())
       .then(data => {
-        const role = data?.session?.user?.role;
+        const role = data?.user?.role;
         if (role !== 'admin') { setIsAdmin(false); setLoading(false); return; }
         setIsAdmin(true);
         return fetch('/api/dashboard/accounts', { credentials: 'include' })

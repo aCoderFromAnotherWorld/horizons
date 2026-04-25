@@ -29,21 +29,33 @@ const DOMAIN_INFO = {
 
 const RISK_DISPLAY = {
   low: {
+    color: '#065F46',
+    bg: '#ECFDF5',
+    border: '#A7F3D0',
     badge: '🟢',
     short: 'Typical Range',
     desc: 'Responses in this area were within the typical range for this age group. No immediate concerns identified.',
   },
   medium: {
+    color: '#92400E',
+    bg: '#FFFBEB',
+    border: '#FDE68A',
     badge: '🟡',
     short: 'Some Differences Noted',
     desc: 'Some differences were observed in this area. Consider mentioning these findings to a specialist during a routine visit.',
   },
   high: {
+    color: '#9A3412',
+    bg: '#FFF7ED',
+    border: '#FED7AA',
     badge: '🟠',
     short: 'Notable Differences',
     desc: 'Noticeable differences were observed. Consulting a qualified specialist for a more detailed assessment is recommended.',
   },
   very_high: {
+    color: '#991B1B',
+    bg: '#FEF2F2',
+    border: '#FECACA',
     badge: '🔴',
     short: 'Significant Differences',
     desc: 'Significant differences were observed in this area. Please consult a qualified specialist as soon as possible.',
@@ -67,10 +79,10 @@ const RED_FLAG_PLAIN = {
 
 function ErrorPage({ message }) {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 p-6 text-center gap-4">
+    <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center gap-4" style={{ background: '#FAFAF8' }}>
       <span className="text-6xl">🔒</span>
-      <h1 className="text-2xl font-bold text-slate-800">Report Unavailable</h1>
-      <p className="text-slate-500 max-w-sm text-sm">{message}</p>
+      <h1 className="text-2xl font-bold" style={{ color: '#0F172A' }}>Report Unavailable</h1>
+      <p className="max-w-sm text-sm" style={{ color: '#57534E' }}>{message}</p>
     </div>
   );
 }
@@ -79,7 +91,6 @@ export default async function ReportPage({ params, searchParams }) {
   const { sessionId } = await params;
   const { token } = await searchParams;
 
-  // Load session
   let session;
   try {
     session = await getSession(sessionId);
@@ -91,13 +102,11 @@ export default async function ReportPage({ params, searchParams }) {
     return <ErrorPage message="Session not found. This report may have been removed." />;
   }
 
-  // Verify HMAC token — constant-time comparison
   const completedAt = session.completed_at ?? session.started_at;
   if (!token || !verifyReportToken(sessionId, completedAt, token)) {
     return <ErrorPage message="This report link is invalid or has expired. Please use the link provided at the end of the game." />;
   }
 
-  // Load domain scores and red flags in parallel
   const [domainScores, redFlags] = await Promise.all([
     getDomainScoresBySession(sessionId),
     getRedFlagsBySession(sessionId),
@@ -106,12 +115,9 @@ export default async function ReportPage({ params, searchParams }) {
   const childName = session.player_name || 'Your Child';
   const firstName = childName.split(' ')[0];
   const dateStr = new Date(completedAt).toLocaleDateString('en-US', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
+    year: 'numeric', month: 'long', day: 'numeric',
   });
 
-  // Determine overall worst risk level
   const overallRisk = domainScores.reduce((worst, ds) => {
     const current = RISK_ORDER.indexOf(ds.risk_level ?? 'low');
     const prev    = RISK_ORDER.indexOf(worst);
@@ -124,108 +130,164 @@ export default async function ReportPage({ params, searchParams }) {
       <style>{`
         @media print {
           .no-print { display: none !important; }
-          body { background: white !important; }
-          @page { margin: 1.5cm; }
+          nav, footer, header, aside { display: none !important; }
+          body { background: #ffffff !important; font-size: 11pt !important; }
+          .report-card { box-shadow: none !important; border: 1px solid #E5E7EB !important; break-inside: avoid; }
+          .report-header { padding-top: 0 !important; }
+          @page { margin: 1.8cm 1.5cm; size: A4; }
         }
       `}</style>
 
-      <div className="min-h-screen bg-slate-50 py-10 px-4">
-        <div className="max-w-2xl mx-auto">
+      {/* Full-page layout: topbar + scrollable body */}
+      <div className="flex flex-col min-h-screen" style={{ background: '#FAFAF8' }}>
 
-          {/* Report header */}
-          <div className="text-center mb-8 pb-6 border-b-2 border-slate-200">
-            <div className="text-5xl mb-3 select-none">🌟</div>
-            <h1 className="text-3xl font-extrabold text-slate-800 mb-1">
-              Horizons Screening Summary
-            </h1>
-            <p className="text-slate-500 text-sm">
-              {firstName} &middot; {dateStr}
-            </p>
+        {/* Topbar — fixed height, does not overlap content */}
+        <div
+          className="no-print sticky top-0 z-20 w-full px-4 shrink-0"
+          style={{
+            background: '#FAFAF8',
+            borderBottom: '1px solid #E7E5E4',
+            boxShadow: '0 1px 3px rgba(0,0,0,0.06)',
+            height: '56px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+          }}
+        >
+          <div className="flex items-center gap-2 font-extrabold text-lg" style={{ color: '#0F172A' }}>
+            <span>🧠</span>
+            <span>Horizons</span>
           </div>
+          <PrintButton label="Save as PDF" />
+        </div>
 
-          {/* Overall risk indicator */}
-          <div className="flex items-center gap-4 bg-white rounded-2xl p-5 border border-slate-200 shadow-sm mb-6">
-            <span className="text-4xl select-none">{overallDisplay.badge}</span>
-            <div>
-              <p className="font-bold text-slate-800 text-lg">{overallDisplay.short}</p>
-              <p className="text-slate-500 text-sm mt-0.5 leading-snug">{overallDisplay.desc}</p>
+        {/* Scrollable content — starts below topbar due to flex layout */}
+        <div className="flex-1 py-10 px-4">
+          <div className="max-w-2xl mx-auto space-y-5">
+
+            {/* Header */}
+            <div className="report-header text-center pb-6" style={{ borderBottom: '2px solid #E7E5E4' }}>
+              <div className="text-5xl mb-3 select-none">🌟</div>
+              <h1 className="text-2xl font-extrabold mb-1" style={{ color: '#0F172A' }}>
+                Horizons Screening Summary
+              </h1>
+              <p className="text-sm" style={{ color: '#78716C' }}>
+                {firstName} &middot; {dateStr}
+              </p>
             </div>
-          </div>
 
-          {/* Domain results */}
-          <h2 className="text-lg font-bold text-slate-700 mb-3">Domain Results</h2>
-          <div className="flex flex-col gap-3 mb-8">
-            {domainScores.map(ds => {
-              const info    = DOMAIN_INFO[ds.domain] ?? { emoji: '📊', name: ds.domain, description: '' };
-              const display = RISK_DISPLAY[ds.risk_level] ?? RISK_DISPLAY.low;
-              return (
-                <div
-                  key={ds.domain}
-                  className="bg-white rounded-2xl p-4 border border-slate-200 shadow-sm flex items-start gap-4"
-                >
-                  <span className="text-3xl shrink-0 select-none">{info.emoji}</span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
-                      <p className="font-bold text-slate-800">{info.name}</p>
-                      <span className="text-xs font-semibold text-slate-600 shrink-0">
-                        {display.badge} {display.short}
-                      </span>
-                    </div>
-                    <p className="text-slate-500 text-sm leading-snug">{display.desc}</p>
-                    <p className="text-slate-400 text-xs mt-1 leading-snug">{info.description}</p>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-
-          {/* Areas to explore (red flags) */}
-          {redFlags.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-lg font-bold text-slate-700 mb-3">Areas to Explore</h2>
-              <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4">
-                <ul className="space-y-2">
-                  {redFlags.map((flag, i) => (
-                    <li key={i} className="flex items-start gap-2 text-amber-800 text-sm">
-                      <span className="shrink-0 mt-0.5">•</span>
-                      <span>{RED_FLAG_PLAIN[flag.flag_type] ?? flag.description ?? flag.flag_type}</span>
-                    </li>
-                  ))}
-                </ul>
+            {/* Overall risk */}
+            <div
+              className="report-card flex items-start gap-4 rounded-2xl p-5"
+              style={{
+                background: overallDisplay.bg,
+                border: `1px solid ${overallDisplay.border}`,
+                boxShadow: '0 2px 8px rgba(0,0,0,0.06)',
+              }}
+            >
+              <span className="text-4xl select-none shrink-0">{overallDisplay.badge}</span>
+              <div>
+                <p className="font-bold text-lg mb-0.5" style={{ color: overallDisplay.color }}>
+                  {overallDisplay.short}
+                </p>
+                <p className="text-sm leading-relaxed" style={{ color: '#44403C' }}>
+                  {overallDisplay.desc}
+                </p>
               </div>
             </div>
-          )}
 
-          {/* What to do next */}
-          <div className="bg-blue-50 border border-blue-200 rounded-2xl p-5 mb-8">
-            <h2 className="text-lg font-bold text-blue-800 mb-2">🩺 What to Do Next</h2>
-            <p className="text-blue-700 text-sm leading-relaxed">
-              We recommend sharing these results with a <strong>qualified specialist</strong> — such as
-              a developmental paediatrician, child psychologist, or speech-language therapist. They can
-              provide a comprehensive clinical evaluation and discuss these findings in the context of your
-              child&apos;s full developmental history.
-            </p>
+            {/* Domain results */}
+            <div>
+              <h2 className="text-base font-bold mb-3" style={{ color: '#0F172A' }}>Domain Results</h2>
+              <div className="flex flex-col gap-3">
+                {domainScores.map(ds => {
+                  const info    = DOMAIN_INFO[ds.domain] ?? { emoji: '📊', name: ds.domain, description: '' };
+                  const display = RISK_DISPLAY[ds.risk_level] ?? RISK_DISPLAY.low;
+                  return (
+                    <div
+                      key={ds.domain}
+                      className="report-card bg-white rounded-2xl p-4 flex items-start gap-4"
+                      style={{ border: '1px solid #E7E5E4', boxShadow: '0 1px 4px rgba(0,0,0,0.05)' }}
+                    >
+                      <span className="text-3xl shrink-0 select-none">{info.emoji}</span>
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center justify-between gap-2 flex-wrap mb-1">
+                          <p className="font-bold text-sm" style={{ color: '#0F172A' }}>{info.name}</p>
+                          <span
+                            className="text-xs font-semibold px-2 py-0.5 rounded-full shrink-0"
+                            style={{ background: display.bg, color: display.color, border: `1px solid ${display.border}` }}
+                          >
+                            {display.badge} {display.short}
+                          </span>
+                        </div>
+                        <p className="text-xs leading-snug" style={{ color: '#57534E' }}>{display.desc}</p>
+                        <p className="text-xs mt-1 leading-snug" style={{ color: '#A8A29E' }}>{info.description}</p>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Red flags */}
+            {redFlags.length > 0 && (
+              <div>
+                <h2 className="text-base font-bold mb-3" style={{ color: '#0F172A' }}>Areas to Explore</h2>
+                <div
+                  className="report-card rounded-2xl p-4"
+                  style={{ background: '#FFFBEB', border: '1px solid #FDE68A' }}
+                >
+                  <ul className="space-y-2">
+                    {redFlags.map((flag, i) => (
+                      <li key={i} className="flex items-start gap-2 text-sm" style={{ color: '#92400E' }}>
+                        <span className="shrink-0 mt-0.5 font-bold">•</span>
+                        <span>{RED_FLAG_PLAIN[flag.flag_type] ?? flag.description ?? flag.flag_type}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            )}
+
+            {/* Next steps */}
+            <div
+              className="report-card rounded-2xl p-5"
+              style={{ background: '#EFF6FF', border: '1px solid #BFDBFE' }}
+            >
+              <h2 className="text-base font-bold mb-2" style={{ color: '#1D4ED8' }}>🩺 What to Do Next</h2>
+              <p className="text-sm leading-relaxed" style={{ color: '#1E40AF' }}>
+                We recommend sharing these results with a{' '}
+                <strong>qualified specialist</strong> — such as a developmental paediatrician, child
+                psychologist, or speech-language therapist. They can provide a comprehensive clinical
+                evaluation and discuss these findings in the context of your child&apos;s full
+                developmental history.
+              </p>
+            </div>
+
+            {/* Disclaimer */}
+            <div
+              className="report-card rounded-2xl p-5 text-center"
+              style={{ background: '#FFFFFF', border: '2px solid #E7E5E4' }}
+            >
+              <p className="text-xs leading-relaxed" style={{ color: '#57534E' }}>
+                <strong style={{ color: '#0F172A' }}>
+                  This report was generated by Horizons, a research-based screening tool.
+                </strong>
+                <br />
+                It is{' '}
+                <strong style={{ color: '#0F172A' }}>not a medical diagnosis</strong>. Horizons is
+                designed to help caregivers start a conversation with professionals — it does not replace
+                a full clinical assessment. Always consult a qualified specialist before making decisions
+                about your child&apos;s care.
+              </p>
+            </div>
+
+            {/* Bottom PDF button */}
+            <div className="no-print flex justify-center pt-2 pb-6">
+              <PrintButton label="Save as PDF" />
+            </div>
+
           </div>
-
-          {/* Disclaimer */}
-          <div className="bg-white border-2 border-slate-200 rounded-2xl p-5 mb-8 text-center">
-            <p className="text-slate-500 text-xs leading-relaxed">
-              <strong className="text-slate-700">
-                This report was generated by Horizons, a research-based screening tool.
-              </strong>
-              <br />
-              It is <strong className="text-slate-700">not a medical diagnosis</strong>. Horizons is
-              designed to help caregivers start a conversation with professionals — it does not replace
-              a full clinical assessment. Always consult a qualified specialist before making decisions
-              about your child&apos;s care.
-            </p>
-          </div>
-
-          {/* Print button (Client Component) */}
-          <div className="flex justify-center no-print">
-            <PrintButton />
-          </div>
-
         </div>
       </div>
     </>

@@ -115,10 +115,10 @@ export default function DashboardLayout({ children }) {
     fetch('/api/auth/get-session', { credentials: 'include' })
       .then(r => r.json())
       .then(data => {
-        if (!data?.session?.user) {
+        if (!data?.user) {
           router.replace('/dashboard/login');
         } else {
-          setUser(data.session.user);
+          setUser(data.user);
           setReady(true);
         }
       })

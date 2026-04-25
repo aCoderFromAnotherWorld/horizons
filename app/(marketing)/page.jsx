@@ -23,11 +23,11 @@ export default function LandingPage() {
 
 function PrivacySection() {
   return (
-    <section className="py-16 px-4 bg-slate-900 text-white">
+    <section className="py-16 px-4" style={{ background: '#1c2c6e' }}>
       <div className="max-w-5xl mx-auto">
         <div className="text-center mb-10">
-          <h2 className="text-3xl font-extrabold mb-2">Privacy First 🔒</h2>
-          <p className="text-slate-400 text-base max-w-md mx-auto">
+          <h2 className="text-3xl font-extrabold mb-2 text-white">Privacy First 🔒</h2>
+          <p className="text-base max-w-md mx-auto" style={{ color: 'rgba(200,215,255,0.85)' }}>
             Designed with child privacy as a non-negotiable requirement
           </p>
         </div>
@@ -40,11 +40,15 @@ function PrivacySection() {
           ].map(({ emoji, title, desc }) => (
             <div
               key={title}
-              className="bg-white/5 border border-white/10 rounded-2xl p-5 hover:bg-white/8 transition-colors"
+              className="rounded-2xl p-5 transition-colors"
+              style={{
+                background: 'rgba(255,255,255,0.09)',
+                border: '1px solid rgba(255,255,255,0.15)',
+              }}
             >
               <div className="text-3xl mb-3">{emoji}</div>
-              <div className="font-bold text-sm mb-1">{title}</div>
-              <div className="text-slate-400 text-xs leading-relaxed">{desc}</div>
+              <div className="font-bold text-sm mb-1 text-white">{title}</div>
+              <div className="text-xs leading-relaxed" style={{ color: 'rgba(200,215,255,0.88)' }}>{desc}</div>
             </div>
           ))}
         </div>
@@ -57,28 +61,30 @@ function CtaSection() {
   return (
     <section className="py-20 px-4 bg-white text-center">
       <div className="max-w-xl mx-auto">
-        <div className="text-5xl mb-4">🚀</div>
-        <h2 className="text-3xl sm:text-4xl font-extrabold text-gray-900 mb-4 leading-tight">
+        <div className="text-5xl mb-5">🚀</div>
+        <h2 className="text-3xl sm:text-4xl font-extrabold mb-4 leading-tight" style={{ color: '#0F172A' }}>
           Ready to begin?
         </h2>
-        <p className="text-slate-500 text-lg mb-8 leading-relaxed">
+        <p className="text-lg mb-8 leading-relaxed" style={{ color: '#57534E' }}>
           The assessment takes 60–75 minutes. Find a quiet, comfortable place and let your child lead the way.
         </p>
         <div className="flex flex-col sm:flex-row gap-3 justify-center">
           <Link
             href="/game/start"
-            className="inline-flex items-center justify-center rounded-2xl bg-indigo-600 text-white font-bold text-base px-8 py-4 hover:bg-indigo-700 transition-colors min-h-[56px] shadow-lg"
+            className="inline-flex items-center justify-center rounded-2xl text-white font-bold text-base px-8 py-4 min-h-[56px] transition-opacity hover:opacity-90"
+            style={{ background: '#2f4abf', boxShadow: '0 4px 16px rgba(47,74,191,0.35)' }}
           >
             Start Assessment 🚀
           </Link>
           <Link
             href="/about"
-            className="inline-flex items-center justify-center rounded-2xl border border-slate-200 text-slate-700 font-semibold text-base px-8 py-4 hover:bg-slate-50 transition-colors min-h-[56px]"
+            className="inline-flex items-center justify-center rounded-2xl font-semibold text-base px-8 py-4 min-h-[56px] transition-colors hover:bg-[#F5F3F0]"
+            style={{ border: '1px solid #D6D3D1', color: '#44403C' }}
           >
             Read the research
           </Link>
         </div>
-        <p className="text-xs text-slate-400 mt-6">
+        <p className="text-xs mt-6" style={{ color: '#A8A29E' }}>
           ⚠️ This is a screening tool, not a clinical diagnosis. Always consult a qualified professional.
         </p>
       </div>
