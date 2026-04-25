@@ -9,6 +9,7 @@ const nunito = Nunito({
 });
 
 export const metadata = {
+  metadataBase: new URL('https://horizons-asd.vercel.app'),
   title: 'Horizons — Play-Based ASD Screening',
   description:
     'Research-based behavioral screening tool for children aged 3–10. Engaging emoji games analyze social communication, repetitive behaviors, pretend play, and sensory processing.',
