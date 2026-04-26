@@ -20,34 +20,53 @@ function scoreRegulation(type, slow) {
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
 function now() { return Date.now(); }
 
+function seededShuffle(seed, items) {
+  let state = 0;
+  for (let i = 0; i < seed.length; i++) {
+    state = (state * 31 + seed.charCodeAt(i)) >>> 0;
+  }
+
+  const next = () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 0x100000000;
+  };
+
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(next() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 const OPTION_COLORS = {
   appropriate: { bg: 'rgba(16,185,129,0.25)', border: 'rgba(16,185,129,0.6)', hover: 'rgba(16,185,129,0.4)' },
-  avoidant:    { bg: 'rgba(245,158,11,0.2)',  border: 'rgba(245,158,11,0.5)',  hover: 'rgba(245,158,11,0.35)' },
-  aggressive:  { bg: 'rgba(239,68,68,0.2)',   border: 'rgba(239,68,68,0.5)',   hover: 'rgba(239,68,68,0.35)' },
+  avoidant: { bg: 'rgba(245,158,11,0.2)', border: 'rgba(245,158,11,0.5)', hover: 'rgba(245,158,11,0.35)' },
+  aggressive: { bg: 'rgba(239,68,68,0.2)', border: 'rgba(239,68,68,0.5)', hover: 'rgba(239,68,68,0.35)' },
 };
 
 export default function Level3Page() {
   const router = useRouter();
-  const sessionId   = useGameStore(s => s.sessionId);
-  const addScore    = useGameStore(s => s.addScore);
+  const sessionId = useGameStore(s => s.sessionId);
+  const addScore = useGameStore(s => s.addScore);
   const goToChapter = useGameStore(s => s.goToChapter);
-  const { play }    = useSoundCue();
+  const { play } = useSoundCue();
 
   const [showPractice, setShowPractice] = useState(true);
-  const [scenarioIdx, setScenarioIdx]   = useState(0);
-  const [tapped, setTapped]             = useState(false);
-  const [feedback, setFeedback]         = useState({ show: false, correct: true });
-  const [complete, setComplete]         = useState(false);
+  const [scenarioIdx, setScenarioIdx] = useState(0);
+  const [tapped, setTapped] = useState(false);
+  const [feedback, setFeedback] = useState({ show: false, correct: true });
+  const [complete, setComplete] = useState(false);
 
-  const responsesRef   = useRef([]);
-  const sessionIdRef   = useRef(sessionId);
-  const playRef        = useRef(play);
-  const startedAtRef   = useRef(null);
-  const timeoutRef     = useRef(null);
+  const responsesRef = useRef([]);
+  const sessionIdRef = useRef(sessionId);
+  const playRef = useRef(play);
+  const startedAtRef = useRef(null);
+  const timeoutRef = useRef(null);
 
   useLayoutEffect(() => {
     sessionIdRef.current = sessionId;
-    playRef.current      = play;
+    playRef.current = play;
   });
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -67,7 +86,7 @@ export default function Level3Page() {
       handleTimeout();
     }, RESPONSE_TIMEOUT_MS);
     return () => clearTimeout(timeoutRef.current);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [scenarioIdx, showPractice, complete]);
 
   async function handleSelection(option, isSlow = false) {
@@ -76,18 +95,18 @@ export default function Level3Page() {
     setTapped(true);
 
     const scenario = REGULATION_SCENARIOS[scenarioIdx];
-    const elapsed  = now() - startedAtRef.current;
-    const slow     = isSlow || elapsed > RESPONSE_TIMEOUT_MS;
-    const pts      = scoreRegulation(option.type, slow);
+    const elapsed = now() - startedAtRef.current;
+    const slow = isSlow || elapsed > RESPONSE_TIMEOUT_MS;
+    const pts = scoreRegulation(option.type, slow);
     const isCorrect = option.type === 'appropriate';
 
     responsesRef.current.push({
-      taskKey:     scenario.taskKey,
-      startedAt:   startedAtRef.current,
+      taskKey: scenario.taskKey,
+      startedAt: startedAtRef.current,
       responseTimeMs: elapsed,
       isCorrect,
       scorePoints: pts,
-      selection:   { type: option.type, slow },
+      selection: { type: option.type, slow },
     });
 
     setFeedback({ show: true, correct: isCorrect });
@@ -108,6 +127,7 @@ export default function Level3Page() {
 
   async function finishLevel() {
     const totalScore = responsesRef.current.reduce((sum, r) => sum + r.scorePoints, 0);
+    console.log('[Ch2 L3] score:', totalScore, responsesRef.current);
 
     playRef.current('cueChapterComplete');
 
@@ -143,6 +163,9 @@ export default function Level3Page() {
   }
 
   const scenario = REGULATION_SCENARIOS[scenarioIdx];
+  const displayedOptions = scenario
+    ? seededShuffle(`${sessionId ?? 'guest'}:${scenario.taskKey}`, scenario.options)
+    : [];
 
   return (
     <SceneCanvas chapterNumber={2}>
@@ -180,8 +203,8 @@ export default function Level3Page() {
                   backgroundColor: i < scenarioIdx
                     ? 'rgba(255,255,255,0.9)'
                     : i === scenarioIdx
-                    ? '#ffffff'
-                    : 'rgba(255,255,255,0.25)',
+                      ? '#ffffff'
+                      : 'rgba(255,255,255,0.25)',
                   transform: i === scenarioIdx ? 'scale(1.3)' : 'scale(1)',
                 }}
               />
@@ -207,7 +230,7 @@ export default function Level3Page() {
             <p className="text-white/80 text-sm font-semibold text-center mb-1">
               What would you do? 🤔
             </p>
-            {scenario.options.map((opt, i) => {
+            {displayedOptions.map((opt, i) => {
               const colors = OPTION_COLORS[opt.type];
               return (
                 <motion.button
