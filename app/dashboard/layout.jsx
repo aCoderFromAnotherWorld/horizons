@@ -18,6 +18,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { fadeSlide } from '@/lib/visual/animations.js';
+import { Toaster } from '@/components/ui/sonner.jsx';
 
 const NAV_ITEMS = [
   { href: '/dashboard',           label: 'Overview',  Icon: LayoutDashboard, exact: true },
@@ -147,7 +148,12 @@ export default function DashboardLayout({ children }) {
   }
 
   if (isLoginPage) {
-    return <>{children}</>;
+    return (
+      <>
+        {children}
+        <Toaster richColors />
+      </>
+    );
   }
 
   if (!ready) {
@@ -174,6 +180,8 @@ export default function DashboardLayout({ children }) {
   };
 
   return (
+    <>
+    <Toaster richColors />
     <div className="flex min-h-screen bg-slate-50">
       {/* Desktop sidebar */}
       <aside className="hidden lg:flex flex-col w-60 shrink-0 border-r border-slate-200 sticky top-0 h-screen">
@@ -215,5 +223,6 @@ export default function DashboardLayout({ children }) {
         </main>
       </div>
     </div>
+    </>
   );
 }

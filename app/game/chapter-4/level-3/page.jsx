@@ -121,6 +121,11 @@ export default function Level3Page() {
     if (insistTapsRef.current >= INSIST_TAPS) {
       distressFlagRef.current = true;
     }
+    // Stamp insistTaps onto the last pushed response so detectRedFlags can re-derive this flag.
+    const lastResp = responsesRef.current[responsesRef.current.length - 1];
+    if (lastResp) {
+      lastResp.extraData = { ...(lastResp.extraData ?? {}), insistTaps: insistTapsRef.current };
+    }
     advancePattern();
   }
 
@@ -257,7 +262,7 @@ export default function Level3Page() {
       </AnimatePresence>
 
       {!showPractice && pattern && (
-        <div className="flex flex-col items-center justify-between min-h-dvh px-4 py-8 gap-6">
+        <div className="flex flex-col items-center justify-between min-h-full px-4 py-8 gap-6">
           {/* Header */}
           <div className="text-center w-full max-w-sm">
             <motion.h2

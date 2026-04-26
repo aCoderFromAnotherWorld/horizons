@@ -109,7 +109,6 @@ export default function Level1Page() {
         const pts = tapped ? scoreNameTrial(responseMs) : 2;
         totalPoints += pts;
 
-        console.log(`[Ch1 L1] Trial ${i + 1}: tapped=${tapped}, ms=${responseMs}, pts=${pts}`);
 
         responsesRef.current.push({
           taskKey:        trial.taskKey,
@@ -159,7 +158,6 @@ export default function Level1Page() {
         addScore('ch1_baseline', totalPoints);
       }
 
-      console.log('[Ch1 L1] Done. Total pts:', totalPoints, responsesRef.current);
       await delayMs(1200);
       goToChapter(1, 2);
       router.push('/game/chapter-1/level-2');
@@ -180,7 +178,7 @@ export default function Level1Page() {
         onComplete={() => setFeedback(f => ({ ...f, show: false }))}
       />
 
-      <div className="flex flex-col items-center justify-center min-h-dvh px-6 py-8 gap-6">
+      <div className="flex flex-col items-center justify-center min-h-full px-6 py-8 gap-6">
 
         {/* Trial counter */}
         <motion.div

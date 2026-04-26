@@ -200,7 +200,7 @@ export default function Chapter6Page() {
   if (phase === 'loading') {
     return (
       <SceneCanvas chapterNumber={6}>
-        <div className="flex items-center justify-center min-h-dvh">
+        <div className="flex items-center justify-center min-h-full">
           <motion.span
             animate={{ rotate: 360 }}
             transition={{ duration: 1.5, repeat: Infinity, ease: 'linear' }}
@@ -215,7 +215,7 @@ export default function Chapter6Page() {
   if (phase === 'intro') {
     return (
       <SceneCanvas chapterNumber={6}>
-        <div className="flex flex-col items-center justify-center min-h-dvh px-6 text-center gap-6">
+        <div className="flex flex-col items-center justify-center min-h-full px-6 text-center gap-6">
           <motion.div
             initial={{ scale: 0, rotate: -20 }}
             animate={{ scale: 1, rotate: 0 }}
@@ -278,7 +278,7 @@ export default function Chapter6Page() {
           onComplete={() => setFeedback(f => ({ ...f, show: false }))}
         />
 
-        <div className="flex flex-col min-h-dvh px-4 py-6 gap-4">
+        <div className="flex flex-col min-h-full px-4 py-6 gap-4">
           {/* Header */}
           <div className="text-center shrink-0">
             <h2 className="text-2xl font-extrabold text-white drop-shadow">
@@ -497,7 +497,7 @@ export default function Chapter6Page() {
   // Fallback
   return (
     <SceneCanvas chapterNumber={6}>
-      <div className="flex items-center justify-center min-h-dvh">
+      <div className="flex items-center justify-center min-h-full">
         <div className="text-7xl animate-pulse">⭐</div>
       </div>
     </SceneCanvas>

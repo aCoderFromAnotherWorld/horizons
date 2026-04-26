@@ -46,7 +46,7 @@ export default function MapPage() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col items-center px-4 py-6">
+    <div className="min-h-full flex flex-col items-center px-4 py-6">
       {/* Header */}
       <motion.div
         initial={{ y: -20, opacity: 0 }}

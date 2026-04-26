@@ -163,7 +163,7 @@ export default function Level2Page() {
         onComplete={() => setFeedback(f => ({ ...f, show: false }))}
       />
 
-      <div className="flex flex-col items-center justify-between min-h-dvh px-4 py-8 gap-4">
+      <div className="flex flex-col items-center justify-between min-h-full px-4 py-8 gap-4">
         {/* Header */}
         <div className="text-center w-full max-w-sm">
           <motion.h2

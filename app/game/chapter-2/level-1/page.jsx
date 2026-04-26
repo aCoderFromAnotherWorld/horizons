@@ -134,7 +134,6 @@ export default function Level1Page() {
 
   async function finishLevel() {
     const { score, redFlag } = scoreLevelOne(responsesRef.current);
-    console.log('[Ch2 L1] score:', score, 'redFlag:', redFlag, responsesRef.current.length, 'responses');
 
     const sid = sessionIdRef.current;
     if (sid) {
@@ -151,6 +150,7 @@ export default function Level1Page() {
               attemptNumber: 1,
               scorePoints: r.scorePoints,
               selection: { emotion: r.selectedEmotion },
+              extraData: { correctEmotion: r.emotion },
             }),
           })
         ),
@@ -224,7 +224,7 @@ export default function Level1Page() {
 
       {/* Game scene */}
       {!showPractice && (
-        <div className="flex flex-col items-center min-h-dvh px-4 py-6 gap-4">
+        <div className="flex flex-col items-center min-h-full px-4 py-6 gap-4">
           {/* Progress header */}
           <div className="w-full max-w-lg flex items-center justify-between">
             <p className="text-white/80 text-sm font-semibold">
