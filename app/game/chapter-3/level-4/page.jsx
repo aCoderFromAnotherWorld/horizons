@@ -178,7 +178,7 @@ export default function Level4Page() {
 
     setComplete(true);
     await delayMs(2000);
-    goToChapter(3, 5);
+    goToChapter(4, 1);
     router.push('/game/map');
   }
 
@@ -210,7 +210,7 @@ export default function Level4Page() {
 
       {/* Game content */}
       {!showPractice && action && (
-        <div className="flex flex-col items-center justify-between min-h-dvh px-4 py-6 gap-4">
+        <div className="flex flex-col items-center justify-between min-h-full px-4 py-6 gap-4">
           {/* Progress */}
           <div className="w-full max-w-sm flex items-center gap-2">
             <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">

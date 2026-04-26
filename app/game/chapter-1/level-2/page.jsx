@@ -131,7 +131,6 @@ export default function Level2Page() {
       }
 
       totalPoints += pts;
-      console.log(`[Ch1 L2] Target ${i + 1} (${target.emoji}): result=${result}, pts=${pts}`);
 
       responsesRef.current.push({
         taskKey:        target.taskKey,
@@ -180,7 +179,6 @@ export default function Level2Page() {
       addScore('ch1_baseline', totalPoints);
     }
 
-    console.log('[Ch1 L2] Done. Total pts:', totalPoints, responsesRef.current);
     await delayMs(2500);
     goToChapter(2, 1);
     router.push('/game/map');
@@ -217,7 +215,7 @@ export default function Level2Page() {
 
       {/* Game scene */}
       {!showPractice && (
-        <div className="relative w-full min-h-dvh">
+        <div className="relative w-full min-h-full">
           {/* Target emoji objects */}
           {GUIDE_TARGETS.map((target, i) => {
             const isActive = activeTarget === i;

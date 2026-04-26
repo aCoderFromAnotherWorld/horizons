@@ -17,9 +17,10 @@ function now() { return Date.now(); }
  * Returns { pts, isCorrect }
  */
 function scoreConvo(type) {
-  if (type === 'appropriate') return { pts: 0, isCorrect: true };
-  if (type === 'literal')     return { pts: 2, isCorrect: false };
-  if (type === 'off_topic')   return { pts: 3, isCorrect: false };
+  if (type === 'appropriate')  return { pts: 0, isCorrect: true };
+  if (type === 'literal')      return { pts: 2, isCorrect: false };
+  if (type === 'off_topic')    return { pts: 3, isCorrect: false };
+  if (type === 'no_response')  return { pts: 2, isCorrect: false };
   return { pts: 1, isCorrect: false };
 }
 
@@ -46,6 +47,8 @@ export default function Level2Page() {
   const responsesRef   = useRef([]);
   const sessionIdRef   = useRef(sessionId);
   const playRef        = useRef(play);
+  const timeoutRef     = useRef(null);
+  const startedAtRef   = useRef(null);
   useLayoutEffect(() => {
     sessionIdRef.current = sessionId;
     playRef.current      = play;
@@ -54,11 +57,28 @@ export default function Level2Page() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(3, 2); }, []);
 
+  // Start 10-second timeout when a new non-ToM exchange becomes active
+  useEffect(() => {
+    if (complete) return;
+    const exchange = CONVO_EXCHANGES[exchIdx];
+    if (!exchange || exchange.isTom) return;
+    startedAtRef.current = now();
+    clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      if (!tapped) {
+        handleOptionTap({ type: 'no_response', text: 'No response', emoji: '⏳' });
+      }
+    }, 10000);
+    return () => clearTimeout(timeoutRef.current);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [exchIdx, complete]);
+
   const exchange = CONVO_EXCHANGES[exchIdx];
   const isTom    = exchange?.isTom === true;
 
   async function handleOptionTap(option) {
     if (tapped || complete) return;
+    clearTimeout(timeoutRef.current);
     setTapped(true);
 
     let pts, isCorrect;
@@ -94,8 +114,6 @@ export default function Level2Page() {
   }
 
   async function finishLevel() {
-    // Count how many were factual/literal (not appropriate or tom)
-    const literalCount = responsesRef.current.filter(r => r.selection?.type === 'literal').length;
     let totalScore = responsesRef.current.reduce((s, r) => s + r.scorePoints, 0);
     // +5 if ≥5/6 non-ToM exchanges were factual (overly literal)
     const nonTomResponses = responsesRef.current.filter(r => r.taskKey !== 'ch3_l2_tom');
@@ -189,7 +207,7 @@ export default function Level2Page() {
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0, transition: { delay: i * 0.1 } }}
               whileTap={{ scale: 0.95 }}
-              // eslint-disable-next-line react-hooks/refs
+               
               onClick={() => handleOptionTap(opt)}
               disabled={tapped}
               className="w-full flex items-center gap-3 bg-white/20 border-2 border-white/30 rounded-2xl px-5 py-4 text-white font-semibold text-lg min-h-[64px] select-none hover:bg-white/30 transition-all disabled:pointer-events-none"
@@ -211,7 +229,7 @@ export default function Level2Page() {
         onComplete={() => setFeedback(f => ({ ...f, show: false }))}
       />
 
-      <div className="flex flex-col items-center justify-between min-h-dvh px-4 py-6 gap-4">
+      <div className="flex flex-col items-center justify-between min-h-full px-4 py-6 gap-4">
         {/* Progress */}
         <div className="w-full max-w-sm flex items-center gap-2">
           <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">

@@ -120,6 +120,7 @@ export default function Level3Page() {
       attemptNumber: 1,
       scorePoints:   pts,
       selection:     { soundId: SENSORY_SOUNDS[soundIdx].id, ratingType, isDistressing },
+      extraData:     { sub_scene: 'sounds', distressing: isDistressing },
     });
 
     const isPositive = !isDistressing;
@@ -244,7 +245,7 @@ export default function Level3Page() {
         onComplete={() => setFeedback(f => ({ ...f, show: false }))}
       />
 
-      <div className="flex flex-col items-center justify-between min-h-dvh px-4 py-8 gap-4">
+      <div className="flex flex-col items-center justify-between min-h-full px-4 py-8 gap-4">
         {/* Header */}
         <div className="text-center w-full max-w-sm">
           <motion.h2

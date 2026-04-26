@@ -108,7 +108,6 @@ export default function Level3Page() {
 
   async function finishLevel() {
     const totalScore = responsesRef.current.reduce((sum, r) => sum + r.scorePoints, 0);
-    console.log('[Ch2 L3] score:', totalScore, responsesRef.current);
 
     playRef.current('cueChapterComplete');
 
@@ -170,7 +169,7 @@ export default function Level3Page() {
 
       {/* Game content */}
       {!showPractice && scenario && (
-        <div className="flex flex-col items-center justify-between min-h-dvh px-4 py-8 gap-6">
+        <div className="flex flex-col items-center justify-between min-h-full px-4 py-8 gap-6">
           {/* Progress dots */}
           <div className="flex gap-2">
             {REGULATION_SCENARIOS.map((_, i) => (

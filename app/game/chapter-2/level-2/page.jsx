@@ -100,7 +100,6 @@ export default function Level2Page() {
 
   async function finishLevel() {
     const totalScore = responsesRef.current.reduce((sum, r) => sum + r.scorePoints, 0);
-    console.log('[Ch2 L2] score:', totalScore, responsesRef.current.length, 'responses');
 
     const sid = sessionIdRef.current;
     if (sid) {
@@ -159,7 +158,7 @@ export default function Level2Page() {
 
       {/* Game content */}
       {!showPractice && trial && (
-        <div className="flex flex-col items-center justify-between min-h-dvh px-4 py-6 gap-4">
+        <div className="flex flex-col items-center justify-between min-h-full px-4 py-6 gap-4">
           {/* Progress bar */}
           <div className="w-full max-w-sm flex items-center gap-2">
             <div className="flex-1 h-2 bg-white/20 rounded-full overflow-hidden">

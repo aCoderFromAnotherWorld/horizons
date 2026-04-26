@@ -207,7 +207,7 @@ export default function Level1Page() {
       </AnimatePresence>
 
       {!showPractice && clip && (
-        <div className="flex flex-col items-center justify-between min-h-dvh px-4 py-8 gap-6">
+        <div className="flex flex-col items-center justify-between min-h-full px-4 py-8 gap-6">
           {/* Header */}
           <div className="text-center w-full max-w-sm">
             <motion.h2

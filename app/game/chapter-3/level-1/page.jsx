@@ -115,7 +115,6 @@ export default function Level1Page() {
       setComplete(true);
       playRef.current('cueChapterComplete');
 
-      console.log('[Ch3 L1] score:', totalScore, responsesRef.current);
 
       const sid = sessionIdRef.current;
       if (sid) {
@@ -155,7 +154,7 @@ export default function Level1Page() {
         onComplete={() => setFeedback(f => ({ ...f, show: false }))}
       />
 
-      <div className="flex flex-col items-center justify-between min-h-dvh px-6 py-8 gap-4">
+      <div className="flex flex-col items-center justify-between min-h-full px-6 py-8 gap-4">
         {/* Header */}
         <div className="text-center">
           <motion.p
