@@ -12,6 +12,12 @@ import { DISCOVERY_EVENTS } from '@/lib/gameData/chapter3.js';
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
 function now() { return Date.now(); }
 
+function seededBool(seed) {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = Math.imul(31, h) + seed.charCodeAt(i) | 0;
+  return (h >>> 0) % 2 === 0;
+}
+
 // Each event has two sub-phases: friend_finds (attend) then child_finds (share).
 // Phase A: friend points at their emoji → child must tap it
 // Phase B: child's emoji glows → two buttons Share / Keep
@@ -273,33 +279,44 @@ export default function Level3Page() {
 
           {/* Share / Keep buttons */}
           <AnimatePresence mode="wait">
-            {phase === 'share' && (
-              <motion.div
-                key={`share-btns-${eventIdx}`}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex gap-4 w-full max-w-xs"
-              >
+            {phase === 'share' && (() => {
+              const shareFirst = seededBool(`${sessionId ?? 'guest'}:share:${eventIdx}`);
+              const btnClass = "flex-1 flex flex-col items-center gap-2 bg-white/15 border-2 border-white/25 rounded-2xl py-5 text-white font-bold text-base min-h-[80px] select-none hover:bg-white/25 transition-all disabled:pointer-events-none";
+              const shareBtn = (
                 <motion.button
+                  key="share"
                   whileTap={{ scale: 0.92 }}
                   onClick={() => handleShareChoice('share')}
                   disabled={tapped}
-                  className="flex-1 flex flex-col items-center gap-2 bg-green-400/30 border-2 border-green-300/60 rounded-2xl py-5 text-white font-bold text-base min-h-[80px] select-none hover:bg-green-400/40 transition-all disabled:pointer-events-none"
+                  className={btnClass}
                 >
                   <span className="text-3xl">🎁</span>
                   <span>Share!</span>
                 </motion.button>
+              );
+              const keepBtn = (
                 <motion.button
+                  key="keep"
                   whileTap={{ scale: 0.92 }}
                   onClick={() => handleShareChoice('keep')}
                   disabled={tapped}
-                  className="flex-1 flex flex-col items-center gap-2 bg-white/15 border-2 border-white/25 rounded-2xl py-5 text-white font-bold text-base min-h-[80px] select-none hover:bg-white/25 transition-all disabled:pointer-events-none"
+                  className={btnClass}
                 >
                   <span className="text-3xl">🤐</span>
                   <span>Keep</span>
                 </motion.button>
-              </motion.div>
-            )}
+              );
+              return (
+                <motion.div
+                  key={`share-btns-${eventIdx}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  className="flex gap-4 w-full max-w-xs"
+                >
+                  {shareFirst ? [shareBtn, keepBtn] : [keepBtn, shareBtn]}
+                </motion.div>
+              );
+            })()}
           </AnimatePresence>
         </div>
       </div>

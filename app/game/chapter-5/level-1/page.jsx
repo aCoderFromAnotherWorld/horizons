@@ -18,6 +18,12 @@ const FRAME_DELAY   = 1100; // ms between each animation frame
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
 function now() { return Date.now(); }
 
+function seededBool(seed) {
+  let h = 0;
+  for (let i = 0; i < seed.length; i++) h = Math.imul(31, h) + seed.charCodeAt(i) | 0;
+  return (h >>> 0) % 2 === 0;
+}
+
 export default function Level1Page() {
   const router      = useRouter();
   const sessionId   = useGameStore(s => s.sessionId);
@@ -275,34 +281,45 @@ export default function Level1Page() {
 
             {/* Answer buttons — shown only after animation */}
             <AnimatePresence>
-              {animDone && !answered && (
-                <motion.div
-                  key={`btns-${clipKey}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  className="flex flex-col gap-3 w-full"
-                >
+              {animDone && !answered && (() => {
+                const pretendFirst = seededBool(`${sessionId ?? 'guest'}:pretend:${clipIdx}`);
+                const btnClass = "bg-white/20 border-2 border-white/40 rounded-2xl px-6 py-5 text-white font-bold text-base min-h-[72px] hover:bg-white/30 transition-all select-none";
+                const pretendBtn = (
                   <motion.button
-                    initial={{ x: -20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1, transition: { delay: 0.1 } }}
+                    key="pretend"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0, transition: { delay: 0.1 } }}
                     whileTap={{ scale: 0.94 }}
                     onClick={() => handleAnswer('pretend')}
-                    className="bg-white/25 border-2 border-white/50 rounded-2xl px-6 py-5 text-white font-bold text-lg min-h-[72px] hover:bg-white/35 transition-all select-none"
+                    className={btnClass}
                   >
                     🎭 They&apos;re pretending!
                   </motion.button>
+                );
+                const realBtn = (
                   <motion.button
-                    initial={{ x: 20, opacity: 0 }}
-                    animate={{ x: 0, opacity: 1, transition: { delay: 0.2 } }}
+                    key="real"
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0, transition: { delay: 0.2 } }}
                     whileTap={{ scale: 0.94 }}
                     onClick={() => handleAnswer('real')}
-                    className="bg-white/15 border-2 border-white/25 rounded-2xl px-6 py-5 text-white/90 font-semibold text-base min-h-[72px] hover:bg-white/25 transition-all select-none"
+                    className={btnClass}
                   >
                     {clip.literalLabel}
                   </motion.button>
-                </motion.div>
-              )}
+                );
+                return (
+                  <motion.div
+                    key={`btns-${clipKey}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    className="flex flex-col gap-3 w-full"
+                  >
+                    {pretendFirst ? [pretendBtn, realBtn] : [realBtn, pretendBtn]}
+                  </motion.div>
+                );
+              })()}
             </AnimatePresence>
           </div>
 
