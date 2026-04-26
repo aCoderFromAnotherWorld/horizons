@@ -1,8 +1,9 @@
 import { getAuthenticatedUser } from '@/lib/dashboardAuth.js';
 import { listAllSessions } from '@/lib/db/queries/sessions.js';
 import { getDomainScoresBatch } from '@/lib/db/queries/domainScores.js';
-import { calculateCombinedScore, getRiskLevel } from '@/lib/scoring/engine.js';
-import { DOMAIN_MAX_POINTS } from '@/lib/scoring/domains.js';
+import { getScoresBatch } from '@/lib/db/queries/scores.js';
+import { calculateCombinedScore, getRiskLevel, getDomainRisk } from '@/lib/scoring/engine.js';
+import { DOMAIN_MAX_POINTS, CHAPTER_TO_DOMAIN } from '@/lib/scoring/domains.js';
 
 export async function GET(request) {
   const user = await getAuthenticatedUser(request);
@@ -27,44 +28,80 @@ export async function GET(request) {
       );
     }
 
-    // Single batched domain-score query instead of N+1 queries
     const sessionIds = sessions.map((s) => s.id);
-    const allDomainRows = sessionIds.length > 0
-      ? await getDomainScoresBatch(sessionIds)
-      : [];
 
+    // Fetch pre-computed domain scores AND raw chapter scores in parallel
+    const [allDomainRows, allChapterRows] = sessionIds.length > 0
+      ? await Promise.all([
+          getDomainScoresBatch(sessionIds),
+          getScoresBatch(sessionIds),
+        ])
+      : [[], []];
+
+    // Index domain scores by session
     const domainBySession = {};
     for (const row of allDomainRows) {
       if (!domainBySession[row.session_id]) domainBySession[row.session_id] = [];
       domainBySession[row.session_id].push(row);
     }
 
-    const results = sessions.map((session) => {
-      const domainRows = domainBySession[session.id] ?? [];
-      const domainRaw = {};
-      for (const row of domainRows) {
-        domainRaw[row.domain] = row.raw_score;
-      }
-      const combinedScore = calculateCombinedScore(domainRaw, []);
-      const riskLevel = getRiskLevel(combinedScore);
+    // Index chapter scores by session
+    const chapterBySession = {};
+    for (const row of allChapterRows) {
+      if (!chapterBySession[row.session_id]) chapterBySession[row.session_id] = [];
+      chapterBySession[row.session_id].push(row);
+    }
 
-      return {
-        id: session.id,
-        playerName: session.player_name,
-        playerAge: session.player_age,
-        status: session.status,
-        startedAt: session.started_at,
-        completedAt: session.completed_at,
-        currentChapter: session.current_chapter,
-        guideChoice: session.guide_choice,
-        combinedScore,
-        riskLevel,
-        domainScores: domainRows.map((r) => ({
-          domain: r.domain,
+    const results = sessions.map((session) => {
+      const domainRows   = domainBySession[session.id] ?? [];
+      const chapterRows  = chapterBySession[session.id] ?? [];
+
+      let domainRaw = {};
+      let domainScores = [];
+
+      if (domainRows.length > 0) {
+        // Completed session: use pre-computed domain scores
+        for (const row of domainRows) {
+          domainRaw[row.domain] = row.raw_score;
+        }
+        domainScores = domainRows.map((r) => ({
+          domain:   r.domain,
           rawScore: r.raw_score,
           maxScore: r.max_score ?? DOMAIN_MAX_POINTS[r.domain],
           riskLevel: r.risk_level,
-        })),
+        }));
+      } else if (chapterRows.length > 0) {
+        // In-progress session: compute from chapter scores as best-effort
+        for (const row of chapterRows) {
+          const domain = CHAPTER_TO_DOMAIN[row.chapter_key];
+          if (!domain) continue;
+          domainRaw[domain] = (domainRaw[domain] ?? 0) + row.raw_points;
+        }
+        domainScores = Object.entries(domainRaw).map(([domain, rawScore]) => ({
+          domain,
+          rawScore,
+          maxScore:  DOMAIN_MAX_POINTS[domain],
+          riskLevel: getDomainRisk(domain, rawScore),
+        }));
+      }
+
+      // Return null score when no scoring data exists at all
+      const hasScoreData = Object.keys(domainRaw).length > 0;
+      const combinedScore = hasScoreData ? calculateCombinedScore(domainRaw, []) : null;
+      const riskLevel     = hasScoreData ? getRiskLevel(combinedScore) : null;
+
+      return {
+        id:             session.id,
+        playerName:     session.player_name,
+        playerAge:      session.player_age,
+        status:         session.status,
+        startedAt:      session.started_at,
+        completedAt:    session.completed_at,
+        currentChapter: session.current_chapter,
+        guideChoice:    session.guide_choice,
+        combinedScore,
+        riskLevel,
+        domainScores,
       };
     });
 

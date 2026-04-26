@@ -20,7 +20,7 @@ function LoginForm() {
   const [checking, setChecking] = useState(true);
 
   useEffect(() => {
-    fetch('/api/auth/get-session', { credentials: 'include' })
+    fetch('/api/auth/get-session', { credentials: 'include', cache: 'no-store' })
       .then(r => r.json())
       .then(data => {
         if (data?.user && data.user.is_active !== false) {
@@ -113,6 +113,12 @@ function LoginForm() {
           </form>
         </CardContent>
       </Card>
+      <p className="text-sm text-slate-500">
+        Don&apos;t have an account?{' '}
+        <Link href="/dashboard/signup" className="text-indigo-600 hover:underline">
+          Sign up
+        </Link>
+      </p>
       <Link
         href="/"
         className="text-sm text-slate-500 hover:text-slate-800 transition-colors"
