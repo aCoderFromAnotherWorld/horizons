@@ -1,6 +1,7 @@
 import { requireAdmin } from '@/lib/dashboardAuth.js';
 import { listAccounts } from '@/lib/db/queries/accounts.js';
 import auth from '@/lib/auth.js';
+import sql from '@/lib/db/index.js';
 
 export async function GET(request) {
   const result = await requireAdmin(request);
@@ -38,9 +39,31 @@ export async function POST(request) {
   }
 
   try {
-    await auth.api.createUser({
-      body: { email, password, name: name || email, role, data: { is_active: true } },
+    const signUpRes = await auth.api.signUpEmail({
+      body: { email, password, name: name || email },
+      asResponse: true,
     });
+
+    if (!signUpRes.ok) {
+      const cloned = signUpRes.clone();
+      let errBody = {};
+      try { errBody = await cloned.json(); } catch {}
+      const msg = (errBody?.message || '').toLowerCase();
+      const isConflict =
+        signUpRes.status === 422 ||
+        msg.includes('already exist') ||
+        msg.includes('already in use') ||
+        msg.includes('unique');
+      return Response.json(
+        { error: isConflict ? 'Email already in use' : (errBody?.message || 'Failed to create account') },
+        { status: isConflict ? 409 : 500 }
+      );
+    }
+
+    if (role !== 'researcher') {
+      await sql`UPDATE "user" SET role = ${role} WHERE email = ${email.toLowerCase()}`;
+    }
+
     return Response.json({ ok: true });
   } catch (err) {
     const msg = (err?.message || String(err)).toLowerCase();

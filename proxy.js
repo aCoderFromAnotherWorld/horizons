@@ -4,15 +4,15 @@ import auth from '@/lib/auth.js';
 export async function proxy(request) {
   const { pathname } = request.nextUrl;
 
-  if (pathname === '/dashboard/login') {
-    // Redirect already-authenticated users away from the login page.
+  if (pathname === '/dashboard/login' || pathname === '/dashboard/signup') {
+    // Redirect already-authenticated users away from auth pages.
     try {
       const session = await auth.api.getSession({ headers: request.headers });
       if (session?.user && session.user.is_active !== false) {
         return NextResponse.redirect(new URL('/dashboard', request.url));
       }
     } catch {
-      // No valid session — let the login page render normally.
+      // No valid session — let the page render normally.
     }
     return NextResponse.next();
   }

@@ -111,12 +111,13 @@ export default function DashboardLayout({ children }) {
   const [sheetOpen, setSheetOpen] = useState(false);
   const [ready, setReady]         = useState(false);
 
-  const isLoginPage = pathname === '/dashboard/login';
+  const isPublicPage =
+    pathname === '/dashboard/login' || pathname === '/dashboard/signup';
 
   useEffect(() => {
-    if (isLoginPage) return;
+    if (isPublicPage) return;
 
-    fetch('/api/auth/get-session', { credentials: 'include' })
+    fetch('/api/auth/get-session', { credentials: 'include', cache: 'no-store' })
       .then(r => r.json())
       .then(data => {
         if (!data?.user || data.user.is_active === false) {
@@ -127,27 +128,17 @@ export default function DashboardLayout({ children }) {
         }
       })
       .catch(() => { window.location.href = '/dashboard/login'; });
-  }, [pathname, isLoginPage]);
+  }, [pathname, isPublicPage]);
 
-  async function handleSignOut() {
+  function handleSignOut() {
     if (!window.confirm('Sign out of Horizons Dashboard?')) return;
-    try {
-      const res = await fetch('/api/auth/sign-out', { method: 'POST', credentials: 'include' });
-      if (!res.ok) throw new Error('sign-out failed');
-    } catch {
-      // Retry once
-      try {
-        await fetch('/api/auth/sign-out', { method: 'POST', credentials: 'include' });
-      } catch {
-         
-        console.warn('Sign-out may have failed — close the browser to be safe.');
-      }
-    }
-    // Full reload to flush all React state
-    window.location.href = '/dashboard/login';
+    // Navigate to the server-side sign-out route. It deletes the session from the DB,
+    // force-clears the cookie via Set-Cookie, then redirects to /dashboard/login.
+    // The cookie is gone before the redirect lands, so proxy.js passes through cleanly.
+    window.location.href = '/api/auth/signout';
   }
 
-  if (isLoginPage) {
+  if (isPublicPage) {
     return (
       <>
         {children}
