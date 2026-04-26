@@ -62,7 +62,7 @@ export default function SceneCanvas({ chapterNumber = 1, children }) {
 
   return (
     <div
-      className="relative w-full min-h-full overflow-hidden"
+      className="relative h-full min-h-0 w-full overflow-hidden"
       style={{ background: theme.gradient }}
     >
       {/* Floating background decoratives */}
@@ -79,7 +79,7 @@ export default function SceneCanvas({ chapterNumber = 1, children }) {
       ))}
 
       {/* Page content */}
-      <div className="relative z-10 w-full min-h-full">
+      <div className="relative z-10 h-full w-full">
         {children}
       </div>
     </div>

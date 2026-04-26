@@ -95,7 +95,7 @@ export default function GameLayout({ children }) {
 
   return (
     <div
-      className="relative flex flex-col min-h-dvh overflow-hidden"
+      className="relative flex h-dvh min-h-dvh flex-col overflow-hidden"
       style={{ background: theme.gradient }}
     >
       {/* Top bar: progress (only on chapter pages) */}
@@ -106,14 +106,14 @@ export default function GameLayout({ children }) {
       )}
 
       {/* Main content — animated on route change */}
-      <div className="flex-1 relative z-0 overflow-hidden">
+      <div className="relative z-0 min-h-0 flex-1 overflow-hidden">
         <AnimatePresence mode="wait">
           <motion.div
             key={pathname}
             initial={animations.pageTransition.initial}
             animate={animations.pageTransition.animate}
             exit={animations.pageTransition.exit}
-            className="absolute inset-0 overflow-y-auto"
+            className="absolute inset-0 h-full overflow-y-auto"
           >
             {children}
           </motion.div>
