@@ -121,6 +121,11 @@ export default function Level3Page() {
     if (insistTapsRef.current >= INSIST_TAPS) {
       distressFlagRef.current = true;
     }
+    // Stamp insistTaps onto the last pushed response so detectRedFlags can re-derive this flag.
+    const lastResp = responsesRef.current[responsesRef.current.length - 1];
+    if (lastResp) {
+      lastResp.extraData = { ...(lastResp.extraData ?? {}), insistTaps: insistTapsRef.current };
+    }
     advancePattern();
   }
 

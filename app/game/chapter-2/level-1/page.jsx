@@ -150,6 +150,7 @@ export default function Level1Page() {
               attemptNumber: 1,
               scorePoints: r.scorePoints,
               selection: { emotion: r.selectedEmotion },
+              extraData: { correctEmotion: r.emotion },
             }),
           })
         ),

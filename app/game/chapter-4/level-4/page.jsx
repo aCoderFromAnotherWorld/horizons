@@ -61,7 +61,7 @@ export default function Level4Page() {
     setSelectedTopic(topic);
     setFactIdx(0);
     setPhase('facts');
-    play('cueCorrect');
+    playRef.current('cueCorrect');
   }
 
   function handleNextFact() {
