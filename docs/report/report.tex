@@ -129,7 +129,7 @@
 \renewcommand{\cftchappagefont}{\normalfont\fontsize{12}{18}\selectfont}
 \renewcommand{\cftchapleader}{\cftdotfill{\cftdotsep}}
 \renewcommand{\cftchappresnum}{CHAPTER~}
-\setlength{\cftchapnumwidth}{6.2em}
+\setlength{\cftchapnumwidth}{9.5em}
 \setlength{\cftbeforechapskip}{12pt}
 \setlength{\cftchapindent}{0pt}
 
@@ -215,8 +215,8 @@
 \begin{center}
 	{\fontsize{14}{21}\normalfont\selectfont CSE 3200: System Development Project}\\[18pt]
 	{\fontsize{18}{27}\bfseries\scshape\selectfont
-		Horizons: A Gameplay-Based Autism\\[4pt]
-		Spectrum Disorder Screening System}\\[36pt]
+		Horizons: A Serious Game for Autism\\[4pt]
+		Spectrum Disorder Pre-Screening}\\[36pt]
 	\blanklines{1.5}
 	{\fontsize{14}{21}\normalfont\selectfont By}\\[6pt]
 	\blanklines{3}
@@ -249,8 +249,8 @@
 
 \begin{center}
 	{\fontsize{18}{27}\bfseries\selectfont
-		Horizons: A Gameplay-Based Autism\\[6pt]
-		Spectrum Disorder Screening System}\\[54pt]
+		Horizons: A Serious Game for Autism\\[6pt]
+		Spectrum Disorder Pre-Screening}\\[54pt]
 	{\fontsize{12}{18}\normalfont\selectfont By}\\[6pt]
 	\blanklines{1.5}
 	{\fontsize{12}{18}\bfseries\selectfont Md.\ Shifat Hasan}\\[2pt]
@@ -573,6 +573,67 @@ Table~\ref{tab:related} summarises the five comparison systems across six dimens
 
 The review confirms that no existing system addresses the complete set of design goals targeted by Horizons. The proposed solution is therefore novel and represents a meaningful contribution to the field of technology-assisted ASD screening.
 
+Tables~\ref{tab:gaps} and~\ref{tab:outcomes} distil the principal research gaps uncovered by this review and record the corresponding outcomes that Horizons produces as a direct response to each gap.
+
+\begin{table}[t]
+  \caption{Research gaps identified from the related-work review}
+  \label{tab:gaps}
+  \setstretch{1.2}
+  \begin{tabularx}{\linewidth}{p{4.0cm}Xp{2.0cm}}
+    \toprule
+    \textbf{Gap} & \textbf{Description} & \textbf{Source(s)} \\
+    \midrule
+    Browser-based delivery
+      & No existing system offers zero-install, browser-based ASD screening for children aged 3--10
+      & [3,4,6] \\
+    Multi-domain coverage
+      & No game-based tool simultaneously addresses all four ADOS-2 and DSM-5 indicator domains within a single session
+      & [3,4,6] \\
+    Calibrated age range 3--10
+      & Prior tools target either toddlers or older school-age children; none span the full 3--10 range
+      & [4,5,6] \\
+    Automated red-flag detection
+      & Game-based systems lack automatic detection of clinically significant behavioural patterns with severity weighting
+      & [4,6] \\
+    Shareable caregiver report
+      & No reviewed system generates an integrity-protected report accessible without a researcher account
+      & [3,4,6] \\
+    Pointer trajectory analytics
+      & No tool records and visualises pointer or touch movement as a secondary behavioural signal
+      & [3--7] \\
+    Open-source deployment
+      & No openly deployable, production-quality, multi-domain implementation is publicly available
+      & [3--9] \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
+\begin{table}[b]
+  \caption{Research outcomes: how Horizons addresses each identified gap}
+  \label{tab:outcomes}
+  \setstretch{1.2}
+  \begin{tabularx}{\linewidth}{p{4.6cm}X}
+    \toprule
+    \textbf{Outcome} & \textbf{Horizons Implementation} \\
+    \midrule
+    Browser-based serious game
+      & Next.js~15 application; zero installation required; compatible with any modern browser on tablet or laptop \\
+    Four-domain gameplay coverage
+      & Six chapters mapping to social communication, restricted and repetitive behaviour, pretend play and sensory processing \\
+    Research-informed scoring engine
+      & Penalty model combining ADOS-2 domain weights, the EmoGalaxy task accuracy formula and the DTT average-attempts metric \\
+    Automated red-flag detection
+      & Five flag types with multiplicative severity weights; multiplier stack capped at $2.0\times$ to prevent score inflation \\
+    HMAC-signed caregiver report
+      & SHA-256 signed token generated at session end; the link is shareable without requiring a researcher account \\
+    Researcher analytics dashboard
+      & Per-session domain radar charts, pointer heatmaps, red-flag summaries and JSON or CSV data export \\
+    Automated test coverage
+      & 312-test suite covering scoring unit tests, database queries, API routes and the full scoring pipeline \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
+
 \section{Conclusion}
 
 The survey of ADOS-2~[3], DTT-based game scoring~[6], EmoGalaxy~[4] and M-CHAT-R/F~[5] confirms that no single prior system addresses the full set of design requirements identified in Chapter~I. The reviewed frameworks supply both the scientific justification and the concrete scoring formulae adopted in the Horizons scoring engine, which is described in the methodology presented in Chapter~III.
@@ -695,7 +756,7 @@ Figure~\ref{fig:usecase} maps each of the four principal actors to their respect
 
 A game session goes through three distinct lifecycle states from creation till termination. The transition states are depicted in Figure.~\ref{fig:state}. A game session that has started moving through completion of its chapters will go through six different chapters until it reaches the \textit{completed} terminal state, while if the user abandons the process then the terminal state becomes \textit{abandoned}.
 
-\begin{figure}[t]
+\begin{figure}[b]
   \centering
   \begin{tikzpicture}[
     ->, >=stealth, semithick, node distance=1.4cm,
@@ -724,8 +785,6 @@ A game session goes through three distinct lifecycle states from creation till t
   \caption{Session state transition diagram: three states with two terminal accepting states}
   \label{fig:state}
 \end{figure}
-
-\newpage
 
 \subsection{Overall Framework and Flowchart}
 
@@ -798,7 +857,7 @@ Figure~\ref{fig:dfd0} is a context-level DFD where the system is considered as o
   \label{fig:dfd0}
 \end{figure}
 
-\begin{figure}[bp]
+\begin{figure}[b]
   \centering
   \scalebox{0.82}{%
   \begin{tikzpicture}[
@@ -881,7 +940,7 @@ Better Auth automatically provisions four additional tables (\texttt{user}, \tex
 Figure~\ref{fig:schema} illustrates the entity relationships among the primary game tables.
 \end{sloppypar}
 
-\begin{figure}[t]
+\begin{figure}[b]
   \centering
   \begin{tikzpicture}[
     entity/.style={draw,rectangle,minimum width=2.2cm,minimum height=0.6cm,
@@ -1100,7 +1159,7 @@ Figure~\ref{fig:deploy} shows the five-node deployment diagram and the network p
 
 The full ER diagram in Figure~\ref{fig:erfull} extends the simplified view in Figure~\ref{fig:schema} by showing all eight application tables and the key attributes of each.
 
-\begin{figure}[bp]
+\begin{figure}[b]
   \centering
   \scalebox{0.78}{%
   \begin{tikzpicture}[
@@ -1194,7 +1253,7 @@ The full ER diagram in Figure~\ref{fig:erfull} extends the simplified view in Fi
 
 Figure~\ref{fig:dbschema} presents the physical database schema showing each table's columns and data types.
 
-\begin{figure}[tp]
+\begin{figure}[t]
   \centering
   \scalebox{0.76}{%
   \begin{tikzpicture}[
@@ -1316,7 +1375,7 @@ Figure~\ref{fig:dbschema} presents the physical database schema showing each tab
 
 Figure~\ref{fig:classdiag} presents the class diagram for the key server-side domain objects. \texttt{ScoringEngine} is implemented as a collection of pure functions (no mutable state) and is shown as a utility class; the remaining classes correspond directly to database table row objects managed through the query modules in \texttt{lib/db/queries/}.
 
-\begin{figure}[bp]
+\begin{figure}[b]
   \centering
   \scalebox{0.82}{%
   \begin{tikzpicture}[
@@ -1440,7 +1499,7 @@ Five red flags are defined with multiplicative severity weights: negative emotio
 
 Figure~\ref{fig:seqscoring} traces the message sequence that produces a completed scoring result from a single GET request to the results endpoint. The sequence is linear and involves four participants; no concurrent message paths are present.
 
-\begin{figure}[tp]
+\begin{figure}[t]
   \centering
   \scalebox{0.90}{%
   \begin{tikzpicture}[
@@ -1496,7 +1555,45 @@ Figure~\ref{fig:seqscoring} traces the message sequence that produces a complete
 \clearpage
 \subsection{Game Chapter Design}
 
-Each of the six chapters targets one or more ASD indicator domains through age-appropriate tasks. Table~\ref{tab:chapters} summarises the mapping.
+Each of the six chapters targets one or more ASD indicator domains through age-appropriate game tasks. The mechanics were derived by systematically mapping published ASD behavioural indicators to interactive scenarios that a child aged 3 to 10 can engage with through pointer or touch input alone. Table~\ref{tab:behaviors} lists those indicators alongside their clinical sources and the chapter level in which each is operationalised as a scored game task. Table~\ref{tab:chapters} then summarises the broader chapter-to-domain structure.
+
+\begin{table}[t]
+  \caption{Suspected ASD behavioural indicators and their mapping to Horizons gameplay tasks}
+  \label{tab:behaviors}
+  \setstretch{1.2}
+  \begin{tabularx}{\linewidth}{Xp{3.2cm}cp{2.8cm}}
+    \toprule
+    \textbf{Behavioural Indicator} & \textbf{Clinical Source} & \textbf{Ch.} & \textbf{Level / Task} \\
+    \midrule
+    Reduced or absent response to own name
+      & M-CHAT-R/F item~10 & 1 & L1: Name Response \\
+    Joint attention deficit (gaze following)
+      & M-CHAT-R/F items~9, 16 & 1 & L2: Guide Following \\
+    Difficulty recognising emotions in faces
+      & ADOS-2 SC; EmoGalaxy~[4] & 2 & L1: Emotion Matching \\
+    Impaired emotional regulation
+      & ADOS-2 SC; DSM-5 & 2 & L3: Regulation Scenarios \\
+    Limited social smiling and reciprocity
+      & M-CHAT-R/F item~11; ADOS-2 SC & 3 & L1: Greeting Sequence \\
+    Theory of Mind deficit (false-belief task)
+      & ADOS-2 SC; DSM-5 A.1 & 3 & L2: Conversation \& ToM \\
+    Reduced sharing and joint attention
+      & M-CHAT-R/F items~9, 16; ADOS-2 & 3 & L3: Sharing \& Attention \\
+    Imitation deficit across modalities
+      & M-CHAT-R/F item~15; ADOS-2 & 3 & L4: Copy Cat \\
+    Insistence on sameness and rigid routines
+      & ADOS-2 RRB; DSM-5 B.2 & 4 & L1--L2: Routine \& Flexibility \\
+    Rigid adherence to repetitive patterns
+      & ADOS-2 RRB; DSM-5 B.3 & 4 & L3: Pattern Detective \\
+    Narrow, restricted special interests
+      & ADOS-2 RRB; DSM-5 B.3 & 4 & L4: Special Interests \\
+    Absence of symbolic or pretend play
+      & M-CHAT-R/F item~3; ADOS-2 & 5 & L1--L2: Pretend Play \\
+    Atypical sensory reactivity (hyper- or hypo-)
+      & DSM-5 B.4 & 5 & L3: Sensory Explorer \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
 
 \begin{table}[t]
   \caption{Chapter to domain mapping and task types}
@@ -1576,7 +1673,7 @@ Figure~\ref{fig:activity} shows the in-game activity flow from session start thr
 
 Figure~\ref{fig:seqsession} traces the longer interaction chain across the full game session, from initial caregiver configuration through to report token delivery.
 
-\begin{figure}[bp]
+\begin{figure}[b]
   \centering
   \scalebox{0.82}{%
   \begin{tikzpicture}[
