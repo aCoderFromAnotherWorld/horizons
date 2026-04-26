@@ -13,7 +13,7 @@ import { PRETEND_CLIPS, L1_PRACTICE_STEPS } from '@/lib/gameData/chapter5.js';
 const CHAPTER_KEY   = 'ch5_pretend';
 const RED_FLAG_TYPE = 'complete_absence_pretend_play';
 const TIMEOUT_MS    = 8000;
-const FRAME_DELAY   = 800;  // ms between each animation frame
+const FRAME_DELAY   = 1100; // ms between each animation frame
 
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
 function now() { return Date.now(); }

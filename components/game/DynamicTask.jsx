@@ -27,6 +27,24 @@ const TIMEOUT_MS = 10000;
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
 function now() { return Date.now(); }
 
+function seededShuffle(seed, items) {
+  let state = 0;
+  for (let i = 0; i < seed.length; i++) {
+    state = (state * 31 + seed.charCodeAt(i)) >>> 0;
+  }
+  const next = () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 0x100000000;
+  };
+
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(next() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 // ── tap_target ────────────────────────────────────────────────────────────────
 
 function TapTarget({ task, onComplete }) {
@@ -212,7 +230,14 @@ function SortableItem({ id, emoji, label }) {
 
 function DragSort({ task, onComplete }) {
   const correctOrder = task.options.slice().sort((a, b) => a.correctPos - b.correctPos).map(o => o.id);
-  const [items, setItems] = useState(() => task.options.map(o => ({ ...o })));
+  const [items, setItems] = useState(() => {
+    const initial = seededShuffle(`${task.key}:drag-sort`, task.options.map(o => ({ ...o })));
+    const initialOrder = initial.map(o => o.id);
+    if (initialOrder.every((id, i) => id === correctOrder[i])) {
+      return arrayMove(initial, 0, initial.length - 1);
+    }
+    return initial;
+  });
   const [activeId, setActiveId] = useState(null);
   const [submitted, setSubmitted] = useState(false);
   const startRef = useRef(null);
