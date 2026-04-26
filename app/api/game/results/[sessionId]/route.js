@@ -48,8 +48,9 @@ export async function GET(request, { params }) {
       domains.map(async (domain) => {
         const rawScore     = domainRaw[domain] ?? 0;
         const maxScore     = DOMAIN_MAX_POINTS[domain];
-        // weightedScore = domain contribution to combinedScore (rawScore × weight)
-        const weightedScore = Math.round(rawScore * (DOMAIN_WEIGHTS[domain] ?? 0) * 10) / 10;
+        // weightedScore = normalized domain contribution to combinedScore.
+        const normalizedScore = maxScore ? (rawScore / maxScore) * 100 : 0;
+        const weightedScore = Math.round(normalizedScore * (DOMAIN_WEIGHTS[domain] ?? 0) * 10) / 10;
         const domainRiskLevel = getDomainRisk(domain, rawScore);
 
         await upsertDomainScore({

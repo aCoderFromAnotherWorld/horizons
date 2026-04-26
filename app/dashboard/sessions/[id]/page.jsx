@@ -114,7 +114,8 @@ export default function SessionDetailPage({ params }) {
     ? (() => {
         const domainRaw = {};
         for (const ds of domainScores) domainRaw[ds.domain] = ds.raw_score;
-        return calculateCombinedScore(domainRaw, []);
+        const activeRedFlags = redFlags.map(f => f.flag_type).filter(Boolean);
+        return calculateCombinedScore(domainRaw, activeRedFlags);
       })()
     : null;
 
