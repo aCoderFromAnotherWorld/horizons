@@ -1,4 +1,12 @@
+import { toNextJsHandler } from '@/lib/auth.js';
 import auth from '@/lib/auth.js';
+import sql from '@/lib/db/index.js';
+
+// Use the same HTTP handler as the catch-all auth route so sign-up goes through
+// the identical code path as sign-in. Calling auth.api.signUpEmail() directly
+// (server-side JS API) can diverge from the HTTP handler and cause credential
+// mismatches, leading to "invalid password" on the first login after signup.
+const { POST: authPost } = toNextJsHandler(auth);
 
 export async function POST(request) {
   let body;
@@ -8,7 +16,7 @@ export async function POST(request) {
     return Response.json({ error: 'Invalid request body.' }, { status: 400 });
   }
 
-  const { email, password, name } = body;
+  const { email, password, name, role = 'researcher' } = body;
 
   if (!email || typeof email !== 'string') {
     return Response.json({ error: 'Email is required.' }, { status: 400 });
@@ -16,17 +24,28 @@ export async function POST(request) {
   if (!password || typeof password !== 'string' || password.length < 8) {
     return Response.json({ error: 'Password must be at least 8 characters.' }, { status: 400 });
   }
-  // Public registration always creates researcher accounts; admin accounts require the admin panel.
-  const role = 'researcher';
+  if (!['researcher', 'admin'].includes(role)) {
+    return Response.json({ error: 'Invalid role.' }, { status: 400 });
+  }
+
+  // Build a synthetic request to Better Auth's sign-up HTTP endpoint.
+  // Include the Origin header so Better Auth's origin validation passes —
+  // without it the request is treated as untrusted and rejected.
+  const signUpUrl = new URL('/api/auth/sign-up/email', request.url);
+  const signUpRequest = new Request(signUpUrl.toString(), {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Origin': new URL(request.url).origin,
+    },
+    body: JSON.stringify({ email, password, name: name || email }),
+  });
 
   let signUpRes;
   try {
-    signUpRes = await auth.api.signUpEmail({
-      body: { email, password, name: name || email },
-      asResponse: true,
-    });
+    signUpRes = await authPost(signUpRequest);
   } catch (err) {
-    console.error('[register] signUpEmail error:', err);
+    console.error('[register] sign-up error:', err);
     return Response.json({ error: 'Registration failed.' }, { status: 500 });
   }
 
@@ -44,6 +63,14 @@ export async function POST(request) {
       { error: isConflict ? 'An account with this email already exists.' : (errBody?.message || 'Registration failed.') },
       { status: isConflict ? 409 : signUpRes.status }
     );
+  }
+
+  if (role === 'admin') {
+    try {
+      await sql`UPDATE "user" SET role = 'admin' WHERE email = ${email.toLowerCase()}`;
+    } catch (err) {
+      console.error('[register] role update error:', err);
+    }
   }
 
   return signUpRes;

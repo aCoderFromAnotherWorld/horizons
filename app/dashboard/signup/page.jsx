@@ -7,6 +7,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+
 function SignUpForm() {
   const router = useRouter();
 
@@ -14,8 +22,7 @@ function SignUpForm() {
   const [name,            setName]            = useState('');
   const [password,        setPassword]        = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  // Role is always 'researcher' for self-registration; admin accounts are created via the admin panel.
-  const role = 'researcher';
+  const [role,            setRole]            = useState('researcher');
   const [error,           setError]           = useState('');
   const [loading,         setLoading]         = useState(false);
   const [checking,        setChecking]        = useState(true);
@@ -131,6 +138,19 @@ function SignUpForm() {
                 required
                 autoComplete="new-password"
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="role">Role</Label>
+              <Select value={role} onValueChange={setRole}>
+                <SelectTrigger id="role">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="researcher">Researcher</SelectItem>
+                  <SelectItem value="admin">Administrator</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             {error && (
