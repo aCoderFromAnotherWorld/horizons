@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
@@ -17,6 +17,20 @@ function LoginForm() {
   const [password, setPassword] = useState('');
   const [error,    setError]    = useState('');
   const [loading,  setLoading]  = useState(false);
+  const [checking, setChecking] = useState(true);
+
+  useEffect(() => {
+    fetch('/api/auth/get-session', { credentials: 'include' })
+      .then(r => r.json())
+      .then(data => {
+        if (data?.user && data.user.is_active !== false) {
+          router.replace(next);
+        } else {
+          setChecking(false);
+        }
+      })
+      .catch(() => setChecking(false));
+  }, [router, next]);
 
   async function handleSubmit(e) {
     e.preventDefault();
@@ -52,6 +66,8 @@ function LoginForm() {
       setLoading(false);
     }
   }
+
+  if (checking) return null;
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-slate-50 px-4 gap-4">
