@@ -1,0 +1,33 @@
+\noindent \textbf {Figure No.}\hfill \textbf {Description}\hfill \textbf {Page}\par \vspace {-6pt}
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {1.1}{\ignorespaces Project Gantt chart showing all fifteen development phases across sixteen weeks}}{6}{figure.caption.11}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {3.1}{\ignorespaces Use case diagram showing the four principal actors and their interactions with Horizons}}{15}{figure.caption.15}%
+\contentsline {figure}{\numberline {3.2}{\ignorespaces Session state transition diagram: three states with two terminal accepting states}}{16}{figure.caption.16}%
+\contentsline {figure}{\numberline {3.3}{\ignorespaces High-level system framework of Horizons}}{17}{figure.caption.17}%
+\contentsline {figure}{\numberline {3.4}{\ignorespaces Data Flow Diagram Level 0 (context diagram) for the Horizons system}}{17}{figure.caption.18}%
+\contentsline {figure}{\numberline {3.5}{\ignorespaces Data Flow Diagram Level 1: six sub-processes and four data stores}}{17}{figure.caption.19}%
+\contentsline {figure}{\numberline {3.6}{\ignorespaces Entity relationship diagram for primary database tables}}{18}{figure.caption.20}%
+\contentsline {figure}{\numberline {3.7}{\ignorespaces System architecture overview: four-tier parent block diagram}}{19}{figure.caption.21}%
+\contentsline {figure}{\numberline {3.8}{\ignorespaces Browser Tier sub-diagram: game and UI components with state and hooks}}{19}{figure.caption.22}%
+\contentsline {figure}{\numberline {3.9}{\ignorespaces Application Tier sub-diagram: API route groups and the scoring module}}{19}{figure.caption.23}%
+\contentsline {figure}{\numberline {3.10}{\ignorespaces Data Tier sub-diagram: database infrastructure and query module organisation}}{20}{figure.caption.24}%
+\contentsline {figure}{\numberline {3.11}{\ignorespaces Deployment diagram: five nodes and their communication protocols}}{21}{figure.caption.25}%
+\contentsline {figure}{\numberline {3.12}{\ignorespaces Full ER diagram: all eight application tables with key attributes and relationships}}{22}{figure.caption.26}%
+\contentsline {figure}{\numberline {3.13}{\ignorespaces Database schema diagram: all eight application tables with columns, types and constraints}}{23}{figure.caption.27}%
+\contentsline {figure}{\numberline {3.14}{\ignorespaces Class diagram for key server-side domain objects and the scoring utility}}{23}{figure.caption.28}%
+\contentsline {figure}{\numberline {3.15}{\ignorespaces Sequence diagram: scoring pipeline from results request to complete result object}}{25}{figure.caption.30}%
+\contentsline {figure}{\numberline {3.16}{\ignorespaces Activity diagram: in-game chapter flow from caregiver setup to the results page}}{27}{figure.caption.33}%
+\contentsline {figure}{\numberline {3.17}{\ignorespaces Sequence diagram: full game session flow from caregiver setup to signed report delivery}}{31}{figure.caption.34}%
+\addvspace {10\p@ }
+\contentsline {figure}{\numberline {4.1}{\ignorespaces Wireframe: Landing page showing navigation bar, hero section, How It Works cards and footer}}{34}{figure.caption.36}%
+\contentsline {figure}{\numberline {4.2}{\ignorespaces Wireframe: Caregiver setup screen showing form fields, guide selector and avatar preview}}{34}{figure.caption.37}%
+\contentsline {figure}{\numberline {4.3}{\ignorespaces Wireframe: World Map showing six chapter islands with navigation path and break button}}{35}{figure.caption.38}%
+\contentsline {figure}{\numberline {4.4}{\ignorespaces Wireframe: In-game GameShell showing dual progress bars, guide character and task area}}{35}{figure.caption.39}%
+\contentsline {figure}{\numberline {4.5}{\ignorespaces Wireframe: Results page with overall risk banner, four domain cards and disclaimer}}{36}{figure.caption.40}%
+\contentsline {figure}{\numberline {4.6}{\ignorespaces Wireframe: Researcher Dashboard overview with sidebar, stat cards, charts and session table}}{36}{figure.caption.41}%
+\contentsline {figure}{\numberline {4.7}{\ignorespaces Wireframe: Session detail page showing tabs, domain radar, response time chart and task table}}{37}{figure.caption.42}%
+\addvspace {10\p@ }
+\addvspace {10\p@ }
+\addvspace {10\p@ }

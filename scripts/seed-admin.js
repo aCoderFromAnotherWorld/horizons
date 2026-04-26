@@ -16,13 +16,13 @@ if (password.length < 12) {
 
 async function seedAdmin() {
   try {
-    const result = await auth.api.signUpEmail({
+    const result = await auth.api.createUser({
       body: {
         email,
         password,
         name,
         role: 'admin',
-        is_active: true,
+        data: { is_active: true },
       },
     });
 
@@ -38,7 +38,8 @@ async function seedAdmin() {
     if (
       message.toLowerCase().includes('unique') ||
       message.toLowerCase().includes('already exists') ||
-      message.toLowerCase().includes('email already')
+      message.toLowerCase().includes('email already') ||
+      message.toLowerCase().includes('user_already_exists')
     ) {
       console.log(`Admin user already exists: ${email}`);
       process.exit(0);

@@ -38,13 +38,13 @@ export async function POST(request) {
   }
 
   try {
-    await auth.api.signUpEmail({
-      body: { email, password, name: name || email, role, is_active: true },
+    await auth.api.createUser({
+      body: { email, password, name: name || email, role, data: { is_active: true } },
     });
     return Response.json({ ok: true });
   } catch (err) {
     const msg = (err?.message || String(err)).toLowerCase();
-    if (msg.includes('unique') || msg.includes('already')) {
+    if (msg.includes('unique') || msg.includes('already') || msg.includes('user_already_exists')) {
       return Response.json({ error: 'Email already in use' }, { status: 409 });
     }
     console.error('[POST /api/dashboard/accounts]', err);
