@@ -3,7 +3,7 @@ import { getScoresBySession } from '@/lib/db/queries/scores.js';
 import { getRedFlagsBySession } from '@/lib/db/queries/redFlags.js';
 import { getResponsesBySession } from '@/lib/db/queries/responses.js';
 import { upsertDomainScore } from '@/lib/db/queries/domainScores.js';
-import { CHAPTER_TO_DOMAIN, DOMAIN_MAX_POINTS } from '@/lib/scoring/domains.js';
+import { CHAPTER_TO_DOMAIN, DOMAIN_MAX_POINTS, DOMAIN_WEIGHTS } from '@/lib/scoring/domains.js';
 import {
   calculateCombinedScore,
   getRiskLevel,
@@ -46,9 +46,10 @@ export async function GET(request, { params }) {
     const domains = ['social_communication', 'restricted_repetitive', 'pretend_play', 'sensory_processing'];
     const domainScores = await Promise.all(
       domains.map(async (domain) => {
-        const rawScore = domainRaw[domain] ?? 0;
-        const maxScore = DOMAIN_MAX_POINTS[domain];
-        const normalized = (rawScore / maxScore) * 100;
+        const rawScore     = domainRaw[domain] ?? 0;
+        const maxScore     = DOMAIN_MAX_POINTS[domain];
+        // weightedScore = domain contribution to combinedScore (rawScore × weight)
+        const weightedScore = Math.round(rawScore * (DOMAIN_WEIGHTS[domain] ?? 0) * 10) / 10;
         const domainRiskLevel = getDomainRisk(domain, rawScore);
 
         await upsertDomainScore({
@@ -56,12 +57,12 @@ export async function GET(request, { params }) {
           domain,
           rawScore,
           maxScore,
-          weightedScore: normalized,
+          weightedScore,
           riskLevel: domainRiskLevel,
           calculatedAt: now,
         });
 
-        return { domain, rawScore, maxScore, weightedScore: normalized, riskLevel: domainRiskLevel };
+        return { domain, rawScore, maxScore, weightedScore, riskLevel: domainRiskLevel };
       })
     );
 
