@@ -39,11 +39,11 @@ function seededShuffle(seed, items) {
   return copy;
 }
 
-const OPTION_COLORS = {
-  appropriate: { bg: 'rgba(16,185,129,0.25)', border: 'rgba(16,185,129,0.6)', hover: 'rgba(16,185,129,0.4)' },
-  avoidant: { bg: 'rgba(245,158,11,0.2)', border: 'rgba(245,158,11,0.5)', hover: 'rgba(245,158,11,0.35)' },
-  aggressive: { bg: 'rgba(239,68,68,0.2)', border: 'rgba(239,68,68,0.5)', hover: 'rgba(239,68,68,0.35)' },
-};
+const OPTION_COLORS = [
+  { bg: 'rgba(255,255,255,0.16)', border: 'rgba(255,255,255,0.32)' },
+  { bg: 'rgba(255,255,255,0.20)', border: 'rgba(255,255,255,0.38)' },
+  { bg: 'rgba(255,255,255,0.14)', border: 'rgba(255,255,255,0.28)' },
+];
 
 export default function Level3Page() {
   const router = useRouter();
@@ -231,7 +231,7 @@ export default function Level3Page() {
               What would you do? 🤔
             </p>
             {displayedOptions.map((opt, i) => {
-              const colors = OPTION_COLORS[opt.type];
+              const colors = OPTION_COLORS[i % OPTION_COLORS.length];
               return (
                 <motion.button
                   key={opt.type}
