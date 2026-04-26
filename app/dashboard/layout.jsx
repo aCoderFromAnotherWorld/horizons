@@ -106,11 +106,15 @@ function SidebarContent({ user, pathname, onNav, onSignOut }) {
 
 export default function DashboardLayout({ children }) {
   const pathname = usePathname();
-  const [user, setUser]         = useState(null);
+  const [user, setUser]           = useState(null);
   const [sheetOpen, setSheetOpen] = useState(false);
-  const [ready, setReady]       = useState(false);
+  const [ready, setReady]         = useState(false);
+
+  const isLoginPage = pathname === '/dashboard/login';
 
   useEffect(() => {
+    if (isLoginPage) return;
+
     fetch('/api/auth/get-session', { credentials: 'include' })
       .then(r => r.json())
       .then(data => {
@@ -122,9 +126,7 @@ export default function DashboardLayout({ children }) {
         }
       })
       .catch(() => { window.location.href = '/dashboard/login'; });
-  // Re-validate on route change to catch mid-session deactivation
-   
-  }, [pathname]);
+  }, [pathname, isLoginPage]);
 
   async function handleSignOut() {
     if (!window.confirm('Sign out of Horizons Dashboard?')) return;
@@ -142,6 +144,10 @@ export default function DashboardLayout({ children }) {
     }
     // Full reload to flush all React state
     window.location.href = '/dashboard/login';
+  }
+
+  if (isLoginPage) {
+    return <>{children}</>;
   }
 
   if (!ready) {
