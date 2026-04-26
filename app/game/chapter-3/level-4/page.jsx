@@ -227,6 +227,7 @@ export default function Level4Page() {
           {/* Action clip */}
           <div className="flex-1 flex flex-col items-center justify-center gap-6 w-full max-w-sm">
             <AnimatePresence mode="wait">
+              {animating && (
               <motion.div
                 key={`clip-${trialKey}`}
                 initial={{ scale: 0.6, opacity: 0 }}
@@ -251,6 +252,7 @@ export default function Level4Page() {
 
                 <p className="text-white font-bold text-lg">{action.label}</p>
               </motion.div>
+              )}
             </AnimatePresence>
 
             {/* Option grid — shown after animation */}

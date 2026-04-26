@@ -12,15 +12,33 @@ import { CONVO_EXCHANGES, TOM_PROBE } from '@/lib/gameData/chapter3.js';
 function delayMs(ms) { return new Promise(r => setTimeout(r, ms)); }
 function now() { return Date.now(); }
 
+function seededShuffle(seed, items) {
+  let state = 0;
+  for (let i = 0; i < seed.length; i++) {
+    state = (state * 31 + seed.charCodeAt(i)) >>> 0;
+  }
+
+  const next = () => {
+    state = (state * 1664525 + 1013904223) >>> 0;
+    return state / 0x100000000;
+  };
+
+  const copy = [...items];
+  for (let i = copy.length - 1; i > 0; i--) {
+    const j = Math.floor(next() * (i + 1));
+    [copy[i], copy[j]] = [copy[j], copy[i]];
+  }
+  return copy;
+}
+
 /**
  * Score a conversation response.
  * Returns { pts, isCorrect }
  */
 function scoreConvo(type) {
-  if (type === 'appropriate')  return { pts: 0, isCorrect: true };
-  if (type === 'literal')      return { pts: 2, isCorrect: false };
-  if (type === 'off_topic')    return { pts: 3, isCorrect: false };
-  if (type === 'no_response')  return { pts: 2, isCorrect: false };
+  if (type === 'appropriate') return { pts: 0, isCorrect: true };
+  if (type === 'literal')     return { pts: 2, isCorrect: false };
+  if (type === 'off_topic')   return { pts: 3, isCorrect: false };
   return { pts: 1, isCorrect: false };
 }
 
@@ -47,8 +65,6 @@ export default function Level2Page() {
   const responsesRef   = useRef([]);
   const sessionIdRef   = useRef(sessionId);
   const playRef        = useRef(play);
-  const timeoutRef     = useRef(null);
-  const startedAtRef   = useRef(null);
   useLayoutEffect(() => {
     sessionIdRef.current = sessionId;
     playRef.current      = play;
@@ -57,28 +73,14 @@ export default function Level2Page() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => { goToChapter(3, 2); }, []);
 
-  // Start 10-second timeout when a new non-ToM exchange becomes active
-  useEffect(() => {
-    if (complete) return;
-    const exchange = CONVO_EXCHANGES[exchIdx];
-    if (!exchange || exchange.isTom) return;
-    startedAtRef.current = now();
-    clearTimeout(timeoutRef.current);
-    timeoutRef.current = setTimeout(() => {
-      if (!tapped) {
-        handleOptionTap({ type: 'no_response', text: 'No response', emoji: '⏳' });
-      }
-    }, 10000);
-    return () => clearTimeout(timeoutRef.current);
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [exchIdx, complete]);
-
   const exchange = CONVO_EXCHANGES[exchIdx];
   const isTom    = exchange?.isTom === true;
+  const displayedOptions = exchange
+    ? seededShuffle(`${sessionId ?? 'guest'}:${exchange.taskKey}`, exchange.options)
+    : [];
 
   async function handleOptionTap(option) {
     if (tapped || complete) return;
-    clearTimeout(timeoutRef.current);
     setTapped(true);
 
     let pts, isCorrect;
@@ -114,6 +116,8 @@ export default function Level2Page() {
   }
 
   async function finishLevel() {
+    // Count how many were factual/literal (not appropriate or tom)
+    const literalCount = responsesRef.current.filter(r => r.selection?.type === 'literal').length;
     let totalScore = responsesRef.current.reduce((s, r) => s + r.scorePoints, 0);
     // +5 if ≥5/6 non-ToM exchanges were factual (overly literal)
     const nonTomResponses = responsesRef.current.filter(r => r.taskKey !== 'ch3_l2_tom');
@@ -201,13 +205,13 @@ export default function Level2Page() {
           <p className="text-white text-xl font-bold leading-relaxed">{TOM_PROBE.question}</p>
         </div>
         <div className="flex flex-col gap-3 w-full">
-          {exchange.options.map((opt, i) => (
+          {displayedOptions.map((opt, i) => (
             <motion.button
               key={opt.text + i}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0, transition: { delay: i * 0.1 } }}
               whileTap={{ scale: 0.95 }}
-               
+              // eslint-disable-next-line react-hooks/refs
               onClick={() => handleOptionTap(opt)}
               disabled={tapped}
               className="w-full flex items-center gap-3 bg-white/20 border-2 border-white/30 rounded-2xl px-5 py-4 text-white font-semibold text-lg min-h-[64px] select-none hover:bg-white/30 transition-all disabled:pointer-events-none"
@@ -278,7 +282,7 @@ export default function Level2Page() {
                   animate={{ opacity: 1, y: 0 }}
                   className="flex flex-col gap-3"
                 >
-                  {exchange?.options.map((opt, i) => (
+                  {displayedOptions.map((opt, i) => (
                     <motion.button
                       key={opt.text + i}
                       initial={{ opacity: 0, x: 20 }}

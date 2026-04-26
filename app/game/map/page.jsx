@@ -6,12 +6,12 @@ import { useGameStore } from '@/store/gameStore.js';
 import { CHAPTER_THEMES } from '@/lib/visual/themes.js';
 
 const CHAPTERS = [
-  { num: 1, levels: 2,  emoji: '🏡', firstUrl: '/game/chapter-1/level-1' },
-  { num: 2, levels: 3,  emoji: '🎭', firstUrl: '/game/chapter-2/level-1' },
-  { num: 3, levels: 4,  emoji: '🤝', firstUrl: '/game/chapter-3/level-1' },
-  { num: 4, levels: 4,  emoji: '🔄', firstUrl: '/game/chapter-4/level-1' },
-  { num: 5, levels: 3,  emoji: '🎨', firstUrl: '/game/chapter-5/level-1' },
-  { num: 6, levels: 1,  emoji: '⭐', firstUrl: '/game/chapter-6' },
+  { num: 1, levels: 2, emoji: '🏡', firstUrl: '/game/chapter-1/level-1' },
+  { num: 2, levels: 3, emoji: '🎭', firstUrl: '/game/chapter-2/level-1' },
+  { num: 3, levels: 4, emoji: '🤝', firstUrl: '/game/chapter-3/level-1' },
+  { num: 4, levels: 4, emoji: '🔄', firstUrl: '/game/chapter-4/level-1' },
+  { num: 5, levels: 3, emoji: '🎨', firstUrl: '/game/chapter-5/level-1' },
+  { num: 6, levels: 1, emoji: '⭐', firstUrl: '/game/chapter-6' },
 ];
 
 const container = {
@@ -30,19 +30,25 @@ const islandVariant = {
 };
 
 export default function MapPage() {
-  const router         = useRouter();
+  const router = useRouter();
   const currentChapter = useGameStore((s) => s.currentChapter);
-  const currentLevel   = useGameStore((s) => s.currentLevel);
-  const playerName     = useGameStore((s) => s.playerName);
+  const currentLevel = useGameStore((s) => s.currentLevel);
+  const playerName = useGameStore((s) => s.playerName);
 
   function handleChapterTap(ch) {
-    // Only allow entering the current chapter; completed and locked chapters are non-interactive.
-    if (ch.num !== currentChapter) return;
+    if (ch.num > currentChapter) return; // locked
 
-    const url = ch.num === 6
-      ? '/game/chapter-6'
-      : `/game/chapter-${ch.num}/level-${currentLevel}`;
-    router.push(url);
+    if (ch.num < currentChapter) {
+      // Completed chapter — go to first level for review
+      router.push(ch.firstUrl);
+    } else {
+      // Current chapter — go to current level
+      const safeLevel = Math.min(Math.max(currentLevel, 1), ch.levels);
+      const url = ch.num === 6
+        ? '/game/chapter-6'
+        : `/game/chapter-${ch.num}/level-${safeLevel}`;
+      router.push(url);
+    }
   }
 
   return (
@@ -74,10 +80,10 @@ export default function MapPage() {
         className="grid grid-cols-2 sm:grid-cols-3 gap-5 w-full max-w-lg"
       >
         {CHAPTERS.map((ch) => {
-          const theme     = CHAPTER_THEMES[`ch${ch.num}`];
+          const theme = CHAPTER_THEMES[`ch${ch.num}`];
           const completed = ch.num < currentChapter;
-          const active    = ch.num === currentChapter;
-          const locked    = ch.num > currentChapter;
+          const active = ch.num === currentChapter;
+          const locked = ch.num > currentChapter;
 
           return (
             <motion.div
@@ -96,28 +102,28 @@ export default function MapPage() {
               )}
 
               <motion.button
-                whileHover={!locked && !completed ? { scale: 1.05, y: -3 } : {}}
-                whileTap={!locked && !completed ? { scale: 0.95 } : {}}
+                whileHover={!locked ? { scale: 1.05, y: -3 } : {}}
+                whileTap={!locked ? { scale: 0.95 } : {}}
                 onClick={() => handleChapterTap(ch)}
-                disabled={locked || completed}
-                className="relative z-10 w-full flex flex-col items-center gap-2 rounded-3xl p-4 min-h-[140px] justify-center select-none transition-all"
+                disabled={locked}
+                className="relative z-10 w-full flex flex-col items-center gap-2 rounded-3xl p-4 min-h-40 justify-center select-none transition-all"
                 style={{
                   background: locked
                     ? 'rgba(255,255,255,0.08)'
                     : completed
-                    ? `linear-gradient(135deg, ${theme.secondary}cc, ${theme.primary}cc)`
-                    : `linear-gradient(135deg, ${theme.secondary}, ${theme.primary})`,
+                      ? `linear-gradient(135deg, ${theme.secondary}cc, ${theme.primary}cc)`
+                      : `linear-gradient(135deg, ${theme.secondary}, ${theme.primary})`,
                   border: active
                     ? `3px solid white`
                     : completed
-                    ? `2px solid ${theme.secondary}80`
-                    : `2px solid rgba(255,255,255,0.15)`,
+                      ? `2px solid ${theme.secondary}80`
+                      : `2px solid rgba(255,255,255,0.15)`,
                   opacity: locked ? 0.45 : 1,
                   boxShadow: active
                     ? `0 8px 32px ${theme.primary}66`
                     : completed
-                    ? `0 4px 16px ${theme.primary}44`
-                    : 'none',
+                      ? `0 4px 16px ${theme.primary}44`
+                      : 'none',
                   cursor: locked ? 'not-allowed' : 'pointer',
                 }}
               >
@@ -159,8 +165,8 @@ export default function MapPage() {
                             backgroundColor: lvDone
                               ? 'rgba(255,255,255,0.9)'
                               : lvActive
-                              ? '#ffffff'
-                              : 'rgba(255,255,255,0.3)',
+                                ? '#ffffff'
+                                : 'rgba(255,255,255,0.3)',
                           }}
                         />
                       );
@@ -177,7 +183,7 @@ export default function MapPage() {
       <motion.p
         initial={{ opacity: 0 }}
         animate={{ opacity: 1, transition: { delay: 0.8 } }}
-        className="mt-8 text-white/70 text-xs text-center"
+        className="mt-8 text-white/50 text-xs text-center"
       >
         🌟 Complete each chapter to unlock the next adventure!
       </motion.p>

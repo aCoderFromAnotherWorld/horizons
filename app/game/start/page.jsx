@@ -92,7 +92,7 @@ export default function StartPage() {
   }
 
   return (
-    <div className="min-h-dvh flex flex-col items-center justify-center px-4 py-8">
+    <div className="min-h-full flex flex-col items-center justify-center px-4 py-8">
       {/* Step indicator */}
       <div className="flex gap-2 mb-8">
         {Array.from({ length: TOTAL_STEPS }, (_, i) => i + 1).map((s) => (
