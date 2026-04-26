@@ -39,7 +39,7 @@ export default function Level1Page() {
   const animRef      = useRef(null);
   const startedAtRef = useRef(null);
   const responsesRef = useRef([]);
-  const literalCount = useRef(0);
+  const missedPretendCount = useRef(0);
   const sessionIdRef = useRef(sessionId);
   const playRef      = useRef(play);
 
@@ -93,23 +93,29 @@ export default function Level1Page() {
     setAnswered(true);
 
     const elapsed  = startedAtRef.current ? now() - startedAtRef.current : TIMEOUT_MS;
+    const clip = PRETEND_CLIPS[clipIdx];
     const timedOut = type === null;
-    const isLiteral = type === 'literal';
-    const isCorrect = type === 'pretend';
+    const selectedType = type ?? 'timeout';
+    const expectedType = clip.expectedType ?? 'pretend';
+    const isCorrect = selectedType === expectedType;
 
     let pts = 0;
     if (timedOut)  pts = 1;
-    else if (isLiteral) { pts = 2; literalCount.current += 1; }
-    else pts = 0; // pretend = correct
+    else if (!isCorrect) pts = 2;
+
+    if (expectedType === 'pretend' && selectedType === 'real') {
+      missedPretendCount.current += 1;
+    }
 
     responsesRef.current.push({
-      taskKey:       PRETEND_CLIPS[clipIdx].taskKey,
+      taskKey:       clip.taskKey,
       startedAt:     startedAtRef.current ?? now(),
       responseTimeMs: timedOut ? null : elapsed,
       isCorrect,
       attemptNumber: 1,
       scorePoints:   pts,
-      selection:     { type: type ?? 'timeout', timedOut },
+      selection:     { type: selectedType, timedOut },
+      extraData:     { expectedType },
     });
 
     setFeedback({ show: true, correct: isCorrect });
@@ -135,7 +141,8 @@ export default function Level1Page() {
   }
 
   async function finishLevel() {
-    const redFlagTriggered = literalCount.current >= PRETEND_CLIPS.length;
+    const pretendClipCount = PRETEND_CLIPS.filter((clip) => (clip.expectedType ?? 'pretend') === 'pretend').length;
+    const redFlagTriggered = pretendClipCount > 0 && missedPretendCount.current >= pretendClipCount;
     const totalScore = responsesRef.current.reduce((s, r) => s + r.scorePoints, 0)
       + (redFlagTriggered ? 3 : 0);
 
@@ -163,7 +170,7 @@ export default function Level1Page() {
             body: JSON.stringify({
               sessionId: sid,
               flagType: RED_FLAG_TYPE,
-              description: 'All 5 pretend play items answered literally',
+              description: 'All pretend play items were interpreted as real',
               severity: 'moderate',
             }),
           })
@@ -289,7 +296,7 @@ export default function Level1Page() {
                     initial={{ x: 20, opacity: 0 }}
                     animate={{ x: 0, opacity: 1, transition: { delay: 0.2 } }}
                     whileTap={{ scale: 0.94 }}
-                    onClick={() => handleAnswer('literal')}
+                    onClick={() => handleAnswer('real')}
                     className="bg-white/15 border-2 border-white/25 rounded-2xl px-6 py-5 text-white/90 font-semibold text-base min-h-[72px] hover:bg-white/25 transition-all select-none"
                   >
                     {clip.literalLabel}
